@@ -115,21 +115,31 @@ export default function Home() {
     reader.readAsDataURL(file);
   };
 
+  const markersRef = useRef([]);
+  
   // Initialize maps when leaflet is loaded
   useEffect(() => {
     if (!leafletLoaded || typeof window === 'undefined' || !window.L) return;
+    if (activeTab !== 'tab-publico' || selectedBuilding) return;
     
     const initGeneralMap = () => {
       const container = document.getElementById('map-general');
-      if (!container || mapGeneralRef.current) return;
+      if (!container) return;
 
-      const map = window.L.map('map-general', { 
-        zoomControl: false,
-        scrollWheelZoom: false 
-      }).setView([-34.6037, -58.3816], 13);
+      // Create map if it doesn't exist
+      if (!mapGeneralRef.current) {
+        const map = window.L.map('map-general', { 
+          zoomControl: false,
+          scrollWheelZoom: false 
+        }).setView([-34.6037, -58.3816], 13);
+        
+        window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+        mapGeneralRef.current = map;
+      }
       
-      window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
-      mapGeneralRef.current = map;
+      // Clear existing markers
+      markersRef.current.forEach(m => m.remove());
+      markersRef.current = [];
 
       const activeBuildings = getActiveBuildings();
       activeBuildings.forEach(b => {
@@ -140,18 +150,17 @@ export default function Home() {
           weight: 3,
           opacity: 1,
           fillOpacity: 0.8
-        }).addTo(map);
+        }).addTo(mapGeneralRef.current);
         m.on('click', () => showDetail(b.id, true));
         m.bindPopup(`<b class="font-sans text-[12px] uppercase tracking-widest">${b.name}</b>`, { closeButton: false });
         m.on('mouseover', function() { this.openPopup(); });
         m.on('mouseout', function() { this.closePopup(); });
+        markersRef.current.push(m);
       });
     };
 
-    if (activeTab === 'tab-publico' && !selectedBuilding) {
-      setTimeout(initGeneralMap, 100);
-    }
-  }, [leafletLoaded, activeTab, selectedBuilding, getActiveBuildings]);
+    setTimeout(initGeneralMap, 100);
+  }, [leafletLoaded, activeTab, selectedBuilding, buildings, currentCollectionYear]);
 
   // Detail map
   useEffect(() => {
