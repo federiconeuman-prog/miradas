@@ -90,7 +90,7 @@
                 });
             </script>
             <div class="h-px w-32 bg-black/10 mx-auto"></div>
-            <p class="text-sm md:text-lg opacity-40 italic font-sans uppercase tracking-[0.6em]">Patrimonio Arquitectónico de Buenos Aires</p>
+            <p class="text-sm md:text-lg opacity-40 italic font-sans uppercase tracking-[0.6em]">Un proyecto de ORT Medios</p>
         </div>
         <div id="years-container" class="flex flex-col xl:flex-row gap-12 xl:gap-24 items-center justify-center relative z-10 pt-10">
             <!-- Populado dinámicamente por app.js desde Google Sheets -->
@@ -100,10 +100,10 @@
     <!-- VISTA PÚBLICA (MAPA PRINCIPAL) -->
     <section id="tab-publico" class="tab-content min-h-screen">
         <header id="main-header" class="h-[64px] px-6 lg:px-10 border-b border-gray-100 flex justify-between items-center fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md z-[100] transition-transform duration-500">
-            <button onclick="showTab('tab-home')" class="text-xl font-bold tracking-tighter shrink-0">MIRADAS '26</button>
+            <button onclick="showTab('tab-home')" class="text-xl font-bold tracking-tighter shrink-0">MIRADAS</button>
             <div class="flex-1 max-w-lg w-full relative search-container px-4">
                 <div class="relative">
-                    <input id="search-input" type="text" placeholder="Buscar hito..." 
+                    <input id="search-input" type="text" placeholder="Buscar" 
                         class="w-full bg-gray-50 px-6 py-2.5 rounded-xl font-sans text-xs outline-none focus:ring-1 focus:ring-black/5 transition-all" 
                         oninput="handleSearch()"
                         onfocus="showSuggestions()"
@@ -127,11 +127,13 @@
                     </div>
                     
                     <!-- Mapa General (Solo en el listado) -->
-                    <div id="general-map-container" class="mt-32 pb-20 space-y-12 animate-in fade-in duration-1000">
-                        <div class="h-[1px] w-full bg-gray-100"></div>
-                        <h2 class="text-6xl font-bold tracking-tight text-center">Cartografía del Patrimonio</h2>
+                    <div id="general-map-container" class="mt-32 pb-20 space-y-8 animate-in fade-in duration-1000">
+                        <div class="flex items-center gap-8">
+                            <div class="h-px flex-1 bg-gray-100"></div>
+                            <h2 class="text-4xl md:text-6xl font-bold tracking-tight text-center font-serif whitespace-nowrap">Patrimonios en el mapa</h2>
+                            <div class="h-px flex-1 bg-gray-100"></div>
+                        </div>
                         <div id="map-general" class="h-[600px] w-full shadow-inner bg-gray-50 border border-gray-100 rounded-[3rem]"></div>
-                        <p class="font-sans text-[10px] uppercase tracking-widest text-gray-400 text-center">Explora la distribución espacial de los hitos arquitectónicos</p>
                     </div>
                 </div>
  

@@ -1,3 +1,63 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+app.js
+config.js
+GUIA_CARGA.md
+index.html
+metadata.json
+package.json
+project_code.txt
+server.js
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="project_code.txt">
+
+</file>
+
+<file path="app.js">
 let buildings = [];
 let mapGeneral, mapDetail, markerDetail;
 let currentPhotoIndex = 0;
@@ -77,7 +137,7 @@ async function renderYears(collections) {
         <div class="group relative flex flex-col items-center p-12 md:p-16 opacity-10 grayscale transition-all duration-700 cursor-default">
             <div class="flex flex-col items-center gap-4">
                 <span class="font-sans font-bold text-7xl md:text-9xl tracking-tighter">${parseInt(years[0]) + 1}</span>
-                <span class="font-sans text-[10px] uppercase tracking-[0.4em] font-bold">+ Miradas</span>
+                <span class="font-sans text-[10px] uppercase tracking-[0.4em] font-bold">Próximamente</span>
             </div>
         </div>
     `;
@@ -97,7 +157,7 @@ function showTab(id, year = null) {
     if (year) {
         currentCollectionYear = year;
         const logo = document.querySelector('#main-header button');
-        if (logo) logo.textContent = `MIRADAS`;
+        if (logo) logo.textContent = `MIRADAS '${String(year).slice(-2)}`;
     }
 
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -365,8 +425,9 @@ async function showDetail(id, isFromMap = false) {
             <div class="lg:pt-0">
                 <!-- Back Link -->
                 <div class="bg-white/95 backdrop-blur-md pb-4 z-20 flex items-center justify-between lg:static">
-                    <div onclick="closeDetail()" class="text-gray-400 hover:text-black transition-all cursor-pointer">
-                        <span class="text-3xl font-light">←</span>
+                    <div onclick="closeDetail()" class="flex items-center gap-2 text-gray-400 hover:text-black transition-all group font-sans cursor-pointer uppercase text-[10px] md:text-xs tracking-[0.5em] font-bold">
+                        <span class="text-xl">←</span>
+                        <span class="border-b border-transparent group-hover:border-gray-200 pb-0.5 whitespace-nowrap">Volver</span>
                     </div>
                 </div>
 
@@ -405,14 +466,25 @@ async function showDetail(id, isFromMap = false) {
                             </div>
                         </div>
                                 
-                        <div class="px-0 py-3 flex justify-center items-center gap-4">
-                            <p id="carousel-epigraph" class="font-sans text-[10px] md:text-sm leading-relaxed text-gray-400 uppercase tracking-[0.2em] max-w-xl italic text-center">
+                        <div class="px-0 py-3 flex justify-between items-start gap-4">
+                            <p id="carousel-epigraph" class="font-sans text-[10px] md:text-sm leading-relaxed text-gray-400 uppercase tracking-[0.2em] max-w-xl italic">
                                 ${typeof fotos[0] === 'object' ? (fotos[0].epigraph || '') : 'Documentación visual.'}
                             </p>
+                            
+                            <!-- Subida de Imagen -->
+                            <div class="flex items-center gap-2">
+                                <input type="file" id="local-photo-input" class="hidden" accept="image/*" onchange="handleLocalPhoto(event)">
+                                <button onclick="document.getElementById('local-photo-input').click()" class="font-sans text-[10px] uppercase tracking-[0.1em] font-bold text-gray-400 hover:text-black transition-all border border-gray-100 px-5 py-2.5 rounded-full cursor-pointer hover:bg-gray-50">
+                                    + Agregar
+                                </button>
+                            </div>
                         </div>
                     ` : `
                         <div class="h-[40vh] bg-gray-50 flex flex-col items-center justify-center text-center gap-4 p-8 border-y border-gray-100">
-                             <p class="font-sans text-[10px] uppercase tracking-[0.3em] font-bold text-gray-300">Sin registros visuales disponibles</p>
+                             <input type="file" id="local-photo-input" class="hidden" accept="image/*" onchange="handleLocalPhoto(event)">
+                             <button onclick="document.getElementById('local-photo-input').click()" class="font-sans text-[10px] uppercase tracking-[0.3em] font-bold text-gray-400 hover:text-black transition-all border border-gray-200 px-8 py-4 rounded-full cursor-pointer whitespace-nowrap">
+                                + Iniciar registro
+                             </button>
                         </div>
                     `}
                 </div>
@@ -444,12 +516,8 @@ async function showDetail(id, isFromMap = false) {
                 </div>
 
                 <!-- UBICACIÓN -->
-                <div class="space-y-4 pt-12 pb-32">
-                    <div class="flex items-center gap-4">
-                        <div class="h-px flex-1 bg-gray-50"></div>
-                        <h4 class="font-sans text-[10px] font-bold uppercase tracking-[0.6em] text-gray-300 whitespace-nowrap">Patrimonios en el mapa</h4>
-                        <div class="h-px flex-1 bg-gray-50"></div>
-                    </div>
+                <div class="space-y-5 pt-8 pb-32">
+                    <h4 class="font-sans text-[10px] font-bold uppercase tracking-[0.6em] text-gray-400">Mapa</h4>
                     <div id="map-detail" class="h-[400px] w-full shadow-inner rounded-3xl border border-gray-100 overflow-hidden grayscale contrast-125"></div>
                 </div>
             </div>
@@ -479,6 +547,42 @@ function moveCarousel(direction) {
         const current = fotos[currentPhotoIndex];
         epigraph.textContent = typeof current === 'object' ? current.epigraph : 'Documentación visual.';
     }
+}
+
+function handleLocalPhoto(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const url = e.target.result;
+        const newPhoto = { url, epigraph: 'Imagen agregada por el usuario.' };
+        
+        if (!window.currentPhotos) window.currentPhotos = [];
+        window.currentPhotos.push(newPhoto);
+        
+        if (window.currentBuildingId) {
+            window.userBuildingPhotos = window.userBuildingPhotos || {};
+            window.userBuildingPhotos[window.currentBuildingId] = window.currentPhotos;
+        }
+        
+        const track = document.getElementById('carousel-track');
+        if (track) {
+            const index = window.currentPhotos.length - 1;
+            const div = document.createElement('div');
+            div.className = "group min-w-full h-[50vh] lg:h-[70vh] flex items-center justify-center bg-gray-50/20 cursor-zoom-in relative";
+            div.onclick = () => openFullscreen(index);
+            div.innerHTML = `
+                <img src="${url}" class="max-w-full max-h-full object-contain select-none" draggable="false">
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300">
+                    <span class="bg-black/80 text-white px-5 py-2.5 rounded-full text-[9px] uppercase tracking-[0.3em] font-bold font-sans backdrop-blur-md shadow-2xl">Pantalla completa</span>
+                </div>
+            `;
+            track.appendChild(div);
+            moveCarousel(window.currentPhotos.length - 1 - currentPhotoIndex);
+        }
+    };
+    reader.readAsDataURL(file);
 }
 
 function closeDetail() {
@@ -737,3 +841,553 @@ if (_clave) {
     };
     document.body.appendChild(_btn);
 }
+</file>
+
+<file path="config.js">
+export default {
+  sheetId: '1yNUjBkJ8SD3VLwajOynG5mTjzNnrJHEqS8ub8q3ch1Q',
+  refreshKey: 'miradas2026', // Cambiá esto — es la clave para el botón de actualizar
+};
+</file>
+
+<file path="GUIA_CARGA.md">
+# Guía de carga de contenido — Miradas 2026
+
+## Cómo funciona el sistema
+
+El sitio lee los datos directamente desde un Google Sheets. Para actualizar el contenido, editás el sheet y presionás el botón **"Actualizar contenido"** que aparece en la esquina inferior derecha de la web (solo visible con la URL secreta). El sitio no se actualiza solo: siempre hay que presionar ese botón después de hacer cambios.
+
+---
+
+## Permisos del Sheet y de las imágenes
+
+Tanto el Google Sheets como **cada imagen en Google Drive** deben estar compartidos con la opción **"Cualquiera con el enlace puede ver"**. Si una imagen no tiene ese permiso, no va a aparecer en el sitio.
+
+---
+
+## Estructura del Sheet
+
+El Sheet tiene 4 tipos de pestañas. Los nombres deben ser **exactamente** así, respetando mayúsculas y guiones bajos:
+
+| Pestaña | Para qué sirve |
+|---|---|
+| `colecciones` | Lista de años/ediciones del proyecto |
+| `hitos_2026` | Lista de edificios de la edición 2026 |
+| `textos_2026` | Textos descriptivos por edificio |
+| `fotos_2026` | Fotos por edificio |
+
+Para agregar una nueva edición (ej. 2027) se agregan las pestañas `hitos_2027`, `textos_2027` y `fotos_2027`, y una nueva fila en `colecciones`.
+
+---
+
+## Pestaña `colecciones`
+
+| Columna | Valores válidos | Notas |
+|---|---|---|
+| `año` | `2026`, `2027`… | Solo el número, sin texto |
+| `titulo` | Cualquier texto | Se muestra debajo del año en la pantalla de inicio |
+| `imagen` | Link de Google Drive | La imagen de portada del año (debe tener permiso público) |
+| `estado` | `activo` | Escribir exactamente `activo` (minúsculas) para que el año sea accesible. Cualquier otro valor lo muestra como "próximamente" |
+
+---
+
+## Pestaña `hitos_XXXX`
+
+Cada fila es un edificio.
+
+| Columna | Obligatorio | Notas |
+|---|---|---|
+| `id` | Sí | Identificador único. Solo letras minúsculas, números y guiones (`teatro-colon`, `barolo`). Sin espacios, sin tildes |
+| `nombre` | Sí | Nombre completo del edificio |
+| `direccion` | Sí | Dirección postal |
+| `estilo` | Sí | Estilo arquitectónico |
+| `año_construccion` | Sí | Solo el año numérico |
+| `hecho_curioso` | Sí | Dato destacado que aparece al pie del detalle |
+| `lat` | Sí | Latitud. Usar **punto** como decimal: `-34.6096` ⚠️ |
+| `lng` | Sí | Longitud. Usar **punto** como decimal: `-58.3858` ⚠️ |
+| `imagen` | No | Link de Google Drive. Es la imagen de la tarjeta |
+
+> ⚠️ **Coordenadas:** Google Sheets puede cambiar el punto decimal por coma automáticamente. Para evitarlo, formateá las columnas `lat` y `lng` como **Texto** (Formato → Número → Texto sin formato) *antes* de escribir los valores.
+
+---
+
+## Pestaña `textos_XXXX`
+
+Cada fila corresponde a un edificio. Los **nombres de las columnas** se convierten en los títulos de las secciones dentro del detalle del edificio.
+
+| Columna | Notas |
+|---|---|
+| `hito_id` | Debe coincidir exactamente con el `id` del edificio en la pestaña `hitos_XXXX` |
+| (nombre libre) | Cada columna extra que agregues se convierte en una sección. El nombre de la columna es el título |
+
+Ejemplo: si la columna se llama `Historia`, en el sitio aparece la sección con título "Historia" y el texto de esa celda como contenido.
+
+---
+
+## Pestaña `fotos_XXXX`
+
+Cada fila es una foto. Un mismo edificio puede tener varias filas.
+
+| Columna | Obligatorio | Notas |
+|---|---|---|
+| `hito_id` | Sí | Debe coincidir exactamente con el `id` del edificio |
+| `url` | Sí | Link de Google Drive de la foto (debe tener permiso público) |
+| `epigrafe` | No | Texto que aparece debajo de la foto en el carrusel |
+
+---
+
+## Errores frecuentes
+
+- **El edificio no aparece en el mapa:** El `id` está vacío, o las coordenadas tienen coma en vez de punto como separador decimal.
+- **Las fotos no cargan:** La imagen en Drive no tiene permiso "Cualquiera con el enlace puede ver".
+- **El año no es accesible:** El campo `estado` en `colecciones` no dice exactamente `activo`.
+- **Los textos o fotos no aparecen:** El `hito_id` en la pestaña `textos_XXXX` o `fotos_XXXX` no coincide exactamente con el `id` del edificio (revisar espacios, mayúsculas, tildes).
+- **Los cambios no se ven:** Falta presionar el botón "Actualizar contenido" después de editar el sheet.
+</file>
+
+<file path="index.html">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto Miradas 2026</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cormorant Garamond', serif; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        #map-general, #map-detail { border-radius: 1rem; filter: grayscale(1) contrast(1.1); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .welcome-bg { 
+            background: linear-gradient(rgba(253, 253, 251, 0.95), rgba(253, 253, 251, 0.8)), 
+                        url('https://upload.wikimedia.org/wikipedia/commons/e/ea/Plano_de_la_Ciudad_de_Buenos_Aires_-_1900.jpg') center/cover;
+            background-blend-mode: grayscale;
+        }
+        .retro-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: url('https://www.transparenttextures.com/patterns/natural-paper.png');
+            opacity: 0.15;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body class="bg-white text-black">
+    <div class="retro-overlay"></div>
+ 
+    <!-- PANTALLA DE BIENVENIDA -->
+    <section id="tab-home" class="tab-content active h-screen flex flex-col items-center justify-center text-center welcome-bg px-6">
+        <div class="space-y-4 mb-12 pt-20">
+            <h1 id="main-title" class="text-[clamp(4rem,20vw,12rem)] font-bold tracking-tighter leading-[0.8] text-black flex justify-center select-none">
+                <span class="letter group relative" data-letter="M" style="--img: url('https://picsum.photos/seed/m-arch/400/600?grayscale')">M</span>
+                <span class="letter group relative" data-letter="I" style="--img: url('https://picsum.photos/seed/i-arch/400/600?grayscale')">I</span>
+                <span class="letter group relative" data-letter="R" style="--img: url('https://picsum.photos/seed/r-arch/400/600?grayscale')">R</span>
+                <span class="letter group relative" data-letter="A" style="--img: url('https://picsum.photos/seed/a-arch/400/600?grayscale')">A</span>
+                <span class="letter group relative" data-letter="D" style="--img: url('https://picsum.photos/seed/d-arch/400/600?grayscale')">D</span>
+                <span class="letter group relative" data-letter="A" style="--img: url('https://picsum.photos/seed/a2-arch/400/600?grayscale')">A</span>
+                <span class="letter group relative" data-letter="S" style="--img: url('https://picsum.photos/seed/s-arch/400/600?grayscale')">S</span>
+            </h1>
+
+            <style>
+                .letter {
+                    position: relative;
+                    color: #000;
+                    transition: color 0.3s;
+                }
+                .letter::before {
+                    content: attr(data-letter);
+                    position: absolute;
+                    inset: 0;
+                    color: transparent;
+                    background-image: var(--img);
+                    background-size: cover;
+                    background-position: center;
+                    -webkit-background-clip: text;
+                    background-clip: text;
+                    opacity: 0;
+                    transition: opacity 0.5s;
+                    pointer-events: none;
+                    /* Mask that follows the mouse via CSS variables */
+                    -webkit-mask-image: radial-gradient(circle 120px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%);
+                    mask-image: radial-gradient(circle 120px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%);
+                }
+                .letter:hover {
+                    color: rgba(0,0,0,0.1);
+                }
+                .letter:hover::before {
+                    opacity: 1;
+                }
+            </style>
+
+            <script>
+                document.getElementById('main-title').addEventListener('mousemove', (e) => {
+                    const letters = e.currentTarget.querySelectorAll('.letter');
+                    letters.forEach(letter => {
+                        const rect = letter.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        letter.style.setProperty('--mouse-x', `${x}px`);
+                        letter.style.setProperty('--mouse-y', `${y}px`);
+                    });
+                });
+            </script>
+            <div class="h-px w-32 bg-black/10 mx-auto"></div>
+            <p class="text-sm md:text-lg opacity-40 italic font-sans uppercase tracking-[0.6em]">Patrimonio Arquitectónico de Buenos Aires</p>
+        </div>
+        <div id="years-container" class="flex flex-col xl:flex-row gap-12 xl:gap-24 items-center justify-center relative z-10 pt-10">
+            <!-- Populado dinámicamente por app.js desde Google Sheets -->
+        </div>
+    </section>
+
+    <!-- VISTA PÚBLICA (MAPA PRINCIPAL) -->
+    <section id="tab-publico" class="tab-content min-h-screen">
+        <header id="main-header" class="h-[64px] px-6 lg:px-10 border-b border-gray-100 flex justify-between items-center fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md z-[100] transition-transform duration-500">
+            <button onclick="showTab('tab-home')" class="text-xl font-bold tracking-tighter shrink-0">MIRADAS '26</button>
+            <div class="flex-1 max-w-lg w-full relative search-container px-4">
+                <div class="relative">
+                    <input id="search-input" type="text" placeholder="Buscar hito..." 
+                        class="w-full bg-gray-50 px-6 py-2.5 rounded-xl font-sans text-xs outline-none focus:ring-1 focus:ring-black/5 transition-all" 
+                        oninput="handleSearch()"
+                        onfocus="showSuggestions()"
+                        autocomplete="off">
+                </div>
+                <!-- Sugerencias -->
+                <div id="search-suggestions" class="hidden absolute top-full left-4 right-4 bg-white mt-1 rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                    <!-- Inyectado por JS -->
+                </div>
+            </div>
+            <div class="w-32 hidden md:block"></div> <!-- Spacer for symmetry -->
+        </header>
+
+        <main class="max-w-full mx-auto">
+            <div id="main-split-container" class="flex flex-col lg:flex-row h-screen transition-all duration-700 ease-in-out">
+                
+                <!-- Columna Izquierda: Grid de Edificios -->
+                <div id="grid-container" class="flex-1 h-full overflow-y-auto p-6 lg:p-10 pt-[80px] lg:pt-[100px] transition-all duration-700 scroll-smooth">
+                    <div id="buildings-public-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12">
+                        <!-- Tarjetas inyectadas -->
+                    </div>
+                    
+                    <!-- Mapa General (Solo en el listado) -->
+                    <div id="general-map-container" class="mt-32 pb-20 space-y-12 animate-in fade-in duration-1000">
+                        <div class="h-[1px] w-full bg-gray-100"></div>
+                        <h2 class="text-6xl font-bold tracking-tight text-center">Cartografía del Patrimonio</h2>
+                        <div id="map-general" class="h-[600px] w-full shadow-inner bg-gray-50 border border-gray-100 rounded-[3rem]"></div>
+                        <p class="font-sans text-[10px] uppercase tracking-widest text-gray-400 text-center">Explora la distribución espacial de los hitos arquitectónicos</p>
+                    </div>
+                </div>
+ 
+                <!-- Resizer Handle (Minimal) -->
+                <div id="split-resizer" class="hidden lg:flex w-1 hover:w-1.5 bg-gray-100 hover:bg-black cursor-col-resize transition-all z-50 items-center justify-center group active:bg-black">
+                    <div class="h-32 w-px bg-black/5 group-hover:bg-white/20"></div>
+                </div>
+
+                <div id="detail-panel" class="hidden w-full lg:w-[60%] border-l border-gray-100 bg-white h-full overflow-y-auto animate-in slide-in-from-right-full duration-700 scroll-smooth z-30 pt-[64px]">
+                    <div id="detail-content" class="px-6 md:px-[6vw] lg:px-[8vw] py-4 space-y-4">
+                        <!-- Inyectado por JS -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <!-- FULLSCREEN IMAGE OVERLAY -->
+    <div id="fullscreen-overlay" class="fixed inset-0 z-[200] bg-black opacity-0 pointer-events-none transition-opacity duration-500 flex flex-col items-center justify-center">
+        <div class="absolute top-0 left-0 px-6 px-10 py-4 flex justify-between items-center z-10 w-full bg-linear-to-b from-black/50 to-transparent">
+            <div id="fullscreen-info" class="font-sans text-[10px] uppercase tracking-[0.4em] text-white/50 font-bold"></div>
+            <button onclick="closeFullscreen()" class="font-sans text-[10px] uppercase tracking-[0.4em] font-bold text-white/50 hover:text-white transition-all cursor-pointer flex items-center gap-4 group">
+                <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Cerrar ventana</span>
+                <span class="text-2xl font-light">✕</span>
+            </button>
+        </div>
+        <div class="w-full h-full relative flex items-center justify-center overflow-hidden">
+             <div id="fullscreen-track" class="flex transition-transform duration-700 cubic-bezier(0.16, 1, 0.3, 1) h-full w-full">
+                 <!-- Photos injected here -->
+             </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+</file>
+
+<file path="metadata.json">
+{
+  "name": "Miradas 2026: Patrimonio Arquitectónico",
+  "description": "Exploración interactiva del patrimonio arquitectónico de Buenos Aires con cartografía integrada y registros visuales detallados.",
+  "requestFramePermissions": []
+}
+</file>
+
+<file path="package.json">
+{
+  "name": "remix-proyecto-miradas",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "build": "echo 'No build step needed'",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
+</file>
+
+<file path="server.js">
+import express from 'express';
+import { fileURLToPath } from 'url';
+import path from 'path';
+import config from './config.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const app = express();
+app.use(express.json());
+app.use(express.static(process.cwd()));
+
+// ── CSV Parser ───────────────────────────────────────────────────────────────
+// Maneja campos con comas, saltos de línea y comillas dentro de comillas dobles.
+
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+      else if (ch === '"') { inQuotes = false; }
+      else { field += ch; }
+    } else {
+      if      (ch === '"')  { inQuotes = true; }
+      else if (ch === ',')  { row.push(field); field = ''; }
+      else if (ch === '\r') { /* ignorar */ }
+      else if (ch === '\n') {
+        row.push(field); field = '';
+        if (row.some(c => c !== '')) rows.push(row);
+        row = [];
+      } else { field += ch; }
+    }
+  }
+  row.push(field);
+  if (row.some(c => c !== '')) rows.push(row);
+
+  if (rows.length < 2) return [];
+  const headers = rows[0].map(h => h.trim());
+  return rows.slice(1).map(r => {
+    const obj = {};
+    headers.forEach((h, i) => { if (h) obj[h] = (r[i] ?? '').trim(); });
+    return obj;
+  });
+}
+
+// ── Fetch desde Google Sheets ────────────────────────────────────────────────
+
+async function fetchSheet(tabName) {
+  const url = `https://docs.google.com/spreadsheets/d/${config.sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Error en tab "${tabName}": HTTP ${res.status}`);
+  return parseCSV(await res.text());
+}
+
+// ── Caché ────────────────────────────────────────────────────────────────────
+// Se carga al iniciar el servidor y se refresca manualmente con /api/refresh.
+
+let cache = null;
+
+async function buildCache() {
+  console.log('[Sheets] Cargando datos...');
+  const colecciones = await fetchSheet('colecciones');
+  const years = colecciones.map(c => c.año).filter(Boolean);
+
+  const yearData = {};
+  for (const year of years) {
+    const [hitos, textos, fotos] = await Promise.all([
+      fetchSheet(`hitos_${year}`).catch(() => { console.warn(`[Sheets] No se encontró hitos_${year}`); return []; }),
+      fetchSheet(`textos_${year}`).catch(() => { console.warn(`[Sheets] No se encontró textos_${year}`); return []; }),
+      fetchSheet(`fotos_${year}`).catch(() => { console.warn(`[Sheets] No se encontró fotos_${year}`); return []; }),
+    ]);
+    yearData[year] = { hitos, textos, fotos };
+  }
+
+  cache = { colecciones, yearData, loadedAt: new Date().toISOString() };
+  console.log(`[Sheets] OK — años cargados: ${years.join(', ')}`);
+}
+
+async function getCache() {
+  if (!cache) await buildCache();
+  return cache;
+}
+
+// ── Rutas API ────────────────────────────────────────────────────────────────
+
+// Colecciones (años disponibles)
+app.get('/api/collections', async (req, res) => {
+  try {
+    const { colecciones } = await getCache();
+    const result = {};
+    colecciones.forEach(c => {
+      if (c.año) result[c.año] = { titulo: c.titulo, imagen: c.imagen, estado: c.estado };
+    });
+    res.json(result);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error cargando colecciones' });
+  }
+});
+
+// Lista de hitos
+app.get('/api/buildings', async (req, res) => {
+  try {
+    const { yearData } = await getCache();
+    const CAMPOS_BASE = ['id', 'nombre', 'imagen', 'lat', 'lng', 'direccion', 'estilo', 'año_construccion', 'hecho_curioso'];
+    const result = [];
+    const parseCoord = s => parseFloat((s || '').replace(',', '.')) || 0;
+
+    for (const [year, data] of Object.entries(yearData)) {
+      const fotosIds  = new Set(data.fotos.map(f => f.hito_id));
+      const textosIds = new Set(data.textos.map(t => t.hito_id));
+
+      for (const h of data.hitos) {
+        if (!h.id) continue;
+        const extra = Object.fromEntries(Object.entries(h).filter(([k]) => !CAMPOS_BASE.includes(k)));
+        result.push({
+          id:             h.id,
+          name:           h.nombre,
+          address:        h.direccion,
+          style:          h.estilo,
+          year:           h.año_construccion,
+          fact:           h.hecho_curioso,
+          lat:            parseCoord(h.lat),
+          lng:            parseCoord(h.lng),
+          imageUrl:       h.imagen,
+          collectionYear: year,
+          hasEntrega:     fotosIds.has(h.id) || textosIds.has(h.id),
+          ...extra,
+        });
+      }
+    }
+
+    res.json(result);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error cargando hitos' });
+  }
+});
+
+// Detalle de un hito (textos + fotos)
+app.get('/api/entregas/:id', async (req, res) => {
+  try {
+    const { yearData } = await getCache();
+    const id = req.params.id;
+
+    for (const data of Object.values(yearData)) {
+      const textosRow = data.textos.find(t => t.hito_id === id);
+      const fotos     = data.fotos
+        .filter(f => f.hito_id === id)
+        .map(f => ({ url: f.url, epigraph: f.epigrafe || '' }));
+
+      if (!textosRow && fotos.length === 0) continue;
+
+      // Los nombres de columna del tab textos_XXXX se convierten en títulos de sección
+      const secciones = textosRow
+        ? Object.entries(textosRow)
+            .filter(([k]) => k !== 'hito_id' && k.trim() !== '')
+            .map(([titulo, texto]) => ({ titulo, texto }))
+        : [];
+
+      return res.json({ secciones, fotos, loadedAt: cache.loadedAt });
+    }
+
+    res.json(null);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error cargando entrega' });
+  }
+});
+
+// Proxy de imágenes de Google Drive
+app.get('/api/image/:fileId', async (req, res) => {
+  const { fileId } = req.params;
+  if (!/^[a-zA-Z0-9_-]+$/.test(fileId)) return res.status(400).send('ID inválido');
+
+  try {
+    const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    const driveRes = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      redirect: 'follow',
+    });
+
+    if (!driveRes.ok) return res.status(404).send('Imagen no encontrada');
+
+    const contentType = driveRes.headers.get('content-type') || 'image/jpeg';
+    if (contentType.includes('text/html')) {
+      return res.status(403).send('Archivo no accesible — verificá que esté compartido como "Cualquiera con el enlace"');
+    }
+
+    res.set('Content-Type', contentType);
+    res.set('Cache-Control', 'public, max-age=86400');
+    const buffer = await driveRes.arrayBuffer();
+    res.send(Buffer.from(buffer));
+  } catch (e) {
+    console.error('[Image proxy]', e.message);
+    res.status(500).send('Error al obtener imagen');
+  }
+});
+
+// Debug — muestra qué tiene el caché (requiere clave)
+app.get('/api/debug', async (req, res) => {
+  const clave = req.query.clave;
+  if (clave !== config.refreshKey) return res.status(403).json({ error: 'Clave incorrecta' });
+
+  if (!cache) return res.json({ status: 'sin caché' });
+
+  res.json({
+    loadedAt: cache.loadedAt,
+    colecciones: cache.colecciones,
+    years: Object.fromEntries(
+      Object.entries(cache.yearData).map(([year, data]) => [year, {
+        hitos:        data.hitos.length,
+        textos:       data.textos.length,
+        fotos:        data.fotos.length,
+        hitosIds:     data.hitos.map(h => h.id),
+        fotosHitoIds: [...new Set(data.fotos.map(f => f.hito_id))],
+        primerasFotos: data.fotos.slice(0, 3),
+      }])
+    ),
+  });
+});
+
+// Refresco manual del caché (requiere clave)
+app.post('/api/refresh', async (req, res) => {
+  const clave = req.query.clave || req.body?.clave;
+  if (clave !== config.refreshKey) return res.status(403).json({ error: 'Clave incorrecta' });
+
+  try {
+    cache = null;
+    await buildCache();
+    res.json({ ok: true, loadedAt: cache.loadedAt });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error al actualizar: ' + e.message });
+  }
+});
+
+// ── Inicio ───────────────────────────────────────────────────────────────────
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor en http://localhost:${PORT}`);
+  buildCache().catch(e => console.error('[Sheets] Error al iniciar caché:', e.message));
+});
+</file>
+
+</files>

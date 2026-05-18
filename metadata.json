@@ -1,5 +1,10 @@
 {
-  "name": "Miradas 2026: Patrimonio Arquitectónico",
-  "description": "Exploración interactiva del patrimonio arquitectónico de Buenos Aires con cartografía integrada y registros visuales detallados.",
-  "requestFramePermissions": []
+  "name": "Miradas 2026",
+  "description": "Patrimonio Arquitectónico de Buenos Aires. Un proyecto de ORT Medios.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
