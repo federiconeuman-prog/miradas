@@ -34,8 +34,8 @@
     <div class="retro-overlay"></div>
  
     <!-- PANTALLA DE BIENVENIDA -->
-    <section id="tab-home" class="tab-content active h-screen flex flex-col items-center justify-center text-center welcome-bg px-6">
-        <div class="space-y-4 mb-12 pt-20">
+    <section id="tab-home" class="tab-content active min-h-screen py-12 flex flex-col items-center justify-center text-center welcome-bg px-6">
+        <div class="space-y-4 mb-8 pt-10">
             <h1 id="main-title" class="text-[clamp(4rem,20vw,12rem)] font-bold tracking-tighter leading-[0.8] text-black flex justify-center select-none">
                 <span class="letter group relative" data-letter="M" style="--img: url('https://picsum.photos/seed/m-arch/400/600?grayscale')">M</span>
                 <span class="letter group relative" data-letter="I" style="--img: url('https://picsum.photos/seed/i-arch/400/600?grayscale')">I</span>
@@ -89,8 +89,19 @@
                     });
                 });
             </script>
-            <div class="h-px w-32 bg-black/10 mx-auto"></div>
-            <p class="text-sm md:text-lg opacity-40 italic font-sans uppercase tracking-[0.6em]">Un proyecto de ORT Medios</p>
+            <div class="max-w-2xl mx-auto pt-10 pb-6 text-center">
+                <span class="text-[10px] md:text-[11px] font-sans uppercase tracking-[0.5em] font-semibold text-black/40 block mb-6">Proyecto Miradas</span>
+                
+                <!-- Main quote in Playfair Display with exquisite italic styling -->
+                <blockquote class="text-[26px] md:text-[34px] font-display italic font-medium text-black/90 leading-snug tracking-tight max-w-2xl mx-auto mb-6 px-4">
+                    “El patrimonio arquitectónico porteño convierte a Buenos Aires en un museo vivo y a cielo abierto.”
+                </blockquote>
+                
+                <!-- Supporting description with comfortable reading constraints -->
+                <p class="text-[14px] md:text-[15px] font-sans text-black/50 leading-relaxed max-w-lg mx-auto font-normal">
+                    El proyecto <span class="font-medium text-black/80">Miradas</span> está destinado a que los alumnos de quinto año de la orientación de <span class="font-medium text-black/80">Producción en Medios</span> registren fotográficamente una serie de edificios relevantes por su valor arquitectónico, histórico y por las curiosidades que los rodean.
+                </p>
+            </div>
         </div>
         <div id="years-container" class="flex flex-col xl:flex-row gap-12 xl:gap-24 items-center justify-center relative z-10 pt-10">
             <!-- Populado dinámicamente por app.js desde Google Sheets -->

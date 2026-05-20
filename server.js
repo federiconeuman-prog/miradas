@@ -66,7 +66,7 @@ async function buildCache() {
   const yearData = {};
   for (const year of years) {
     const [hitos, textos, fotos] = await Promise.all([
-      fetchSheet(`miradas_${year}`).catch(() => { console.warn(`[Sheets] No se encontró hitos_${year}`); return []; }),
+      fetchSheet(`miradas_${year}`).catch(() => { console.warn(`[Sheets] No se encontró miradas_${year}`); return []; }),
       fetchSheet(`textos_${year}`).catch(() => { console.warn(`[Sheets] No se encontró textos_${year}`); return []; }),
       fetchSheet(`fotos_${year}`).catch(() => { console.warn(`[Sheets] No se encontró fotos_${year}`); return []; }),
     ]);
@@ -114,6 +114,12 @@ app.get('/api/buildings', async (req, res) => {
       for (const h of data.hitos) {
         if (!h.id) continue;
         const extra = Object.fromEntries(Object.entries(h).filter(([k]) => !CAMPOS_BASE.includes(k)));
+        
+        const firstFoto = data.fotos.find(f => f.hito_id === h.id);
+        const imageUrlFallback = firstFoto ? firstFoto.url : '';
+        const isBrokenImage = h.imagen && h.imagen.includes('1pSNj9Kne53NEoq0mTzog9mpPY0OIa8cx');
+        const imageUrl = (!h.imagen || isBrokenImage) ? imageUrlFallback : h.imagen;
+
         result.push({
           id:             h.id,
           name:           h.nombre,
@@ -123,7 +129,7 @@ app.get('/api/buildings', async (req, res) => {
           fact:           h.hecho_curioso,
           lat:            parseCoord(h.lat),
           lng:            parseCoord(h.lng),
-          imageUrl:       h.imagen,
+          imageUrl:       imageUrl,
           collectionYear: year,
           hasEntrega:     fotosIds.has(h.id) || textosIds.has(h.id),
           ...extra,
