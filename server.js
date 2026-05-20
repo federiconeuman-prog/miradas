@@ -60,13 +60,13 @@ let cache = null;
 
 async function buildCache() {
   console.log('[Sheets] Cargando datos...');
-  const colecciones = await fetchSheet('colecciones');
+  const colecciones = await fetchSheet('home_principal');
   const years = colecciones.map(c => c.año).filter(Boolean);
 
   const yearData = {};
   for (const year of years) {
     const [hitos, textos, fotos] = await Promise.all([
-      fetchSheet(`hitos_${year}`).catch(() => { console.warn(`[Sheets] No se encontró hitos_${year}`); return []; }),
+      fetchSheet(`miradas_${year}`).catch(() => { console.warn(`[Sheets] No se encontró hitos_${year}`); return []; }),
       fetchSheet(`textos_${year}`).catch(() => { console.warn(`[Sheets] No se encontró textos_${year}`); return []; }),
       fetchSheet(`fotos_${year}`).catch(() => { console.warn(`[Sheets] No se encontró fotos_${year}`); return []; }),
     ]);
