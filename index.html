@@ -12,7 +12,9 @@
         body { font-family: 'Cormorant Garamond', serif; }
         .font-sans { font-family: 'Inter', sans-serif; }
         .font-display { font-family: 'Playfair Display', serif; }
-        #map-general, #map-detail { border-radius: 1rem; filter: grayscale(1) contrast(1.1); }
+        #map-general, #map-detail { border-radius: 1rem; }
+        #map-general, #map-detail, #map-about, #map-fullpage { filter: grayscale(1) contrast(1.1); }
+        #map-about { border-radius: 2rem; filter: invert(0.95) hue-rotate(180deg) brightness(0.95) saturate(0.8) contrast(1.2); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .welcome-bg { 
@@ -34,7 +36,7 @@
     <div class="retro-overlay"></div>
  
     <!-- PANTALLA DE BIENVENIDA -->
-    <section id="tab-home" class="tab-content active min-h-screen py-12 flex flex-col items-center justify-center text-center welcome-bg px-6">
+    <section id="inicio" class="tab-content active min-h-screen py-12 flex flex-col items-center justify-center text-center welcome-bg px-6 relative">
         <div class="space-y-4 mb-8 pt-10">
             <h1 id="main-title" class="text-[clamp(4rem,20vw,12rem)] font-bold tracking-tighter leading-[0.8] text-black flex justify-center select-none">
                 <span class="letter group relative" data-letter="M" style="--img: url('https://picsum.photos/seed/m-arch/400/600?grayscale')">M</span>
@@ -90,28 +92,37 @@
                 });
             </script>
             <div class="max-w-2xl mx-auto pt-10 pb-6 text-center">
-                <span class="text-[10px] md:text-[11px] font-sans uppercase tracking-[0.5em] font-semibold text-black/40 block mb-6">Proyecto Miradas</span>
+                <span id="home-pre-titulo" class="text-[10px] md:text-[11px] font-sans uppercase tracking-[0.5em] font-semibold text-black/40 block mb-6">Proyecto Miradas</span>
                 
                 <!-- Main quote in Playfair Display with exquisite italic styling -->
-                <blockquote class="text-[26px] md:text-[34px] font-display italic font-medium text-black/90 leading-snug tracking-tight max-w-2xl mx-auto mb-6 px-4">
+                <blockquote id="home-cita" class="text-[26px] md:text-[34px] font-display italic font-medium text-black/90 leading-snug tracking-tight max-w-2xl mx-auto mb-6 px-4">
                     “El patrimonio arquitectónico porteño convierte a Buenos Aires en un museo vivo y a cielo abierto.”
                 </blockquote>
                 
                 <!-- Supporting description with comfortable reading constraints -->
-                <p class="text-[14px] md:text-[15px] font-sans text-black/50 leading-relaxed max-w-lg mx-auto font-normal">
+                <p id="home-descripcion" class="text-[14px] md:text-[15px] font-sans text-black/50 leading-relaxed max-w-lg mx-auto font-normal">
                     El proyecto <span class="font-medium text-black/80">Miradas</span> está destinado a que los alumnos de quinto año de la orientación de <span class="font-medium text-black/80">Producción en Medios</span> registren fotográficamente una serie de edificios relevantes por su valor arquitectónico, histórico y por las curiosidades que los rodean.
                 </p>
             </div>
         </div>
-        <div id="years-container" class="flex flex-col xl:flex-row gap-12 xl:gap-24 items-center justify-center relative z-10 pt-10">
+        <div id="years-container" class="flex flex-col gap-10 items-center justify-center relative z-10 pt-10">
             <!-- Populado dinámicamente por app.js desde Google Sheets -->
+        </div>
+
+        <!-- Elegant 'Sobre el Proyecto' link on the lateral right side -->
+        <div class="absolute right-3 sm:right-6 md:right-8 lg:right-10 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-4 group">
+            <div class="w-px h-10 md:h-16 bg-black/10 group-hover:h-20 lg:group-hover:h-24 group-hover:bg-black/30 transition-all duration-700"></div>
+            <button onclick="showTab('informacion')" class="font-sans text-[9px] md:text-[10px] font-bold uppercase tracking-[0.5em] text-black/40 hover:text-black transition-all cursor-pointer bg-transparent border-none py-3 [writing-mode:vertical-lr] select-none">
+                Sobre el Proyecto
+            </button>
+            <div class="w-px h-10 md:h-16 bg-black/10 group-hover:h-20 lg:group-hover:h-24 group-hover:bg-black/30 transition-all duration-700"></div>
         </div>
     </section>
 
     <!-- VISTA PÚBLICA (MAPA PRINCIPAL) -->
-    <section id="tab-publico" class="tab-content min-h-screen">
+    <section id="hitos" class="tab-content min-h-screen">
         <header id="main-header" class="h-[64px] px-6 lg:px-10 border-b border-gray-100 flex justify-between items-center fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md z-[100] transition-transform duration-500">
-            <button onclick="showTab('tab-home')" class="text-xl font-bold tracking-tighter shrink-0">MIRADAS</button>
+            <button onclick="showTab('inicio')" class="text-2xl font-bold tracking-tighter cursor-pointer hover:text-black/40 transition-colors duration-300 shrink-0 select-none outline-none">MIRADAS</button>
             <div class="flex-1 max-w-lg w-full relative search-container px-4">
                 <div class="relative">
                     <input id="search-input" type="text" placeholder="Buscar" 
@@ -125,7 +136,12 @@
                     <!-- Inyectado por JS -->
                 </div>
             </div>
-            <div class="w-32 hidden md:block"></div> <!-- Spacer for symmetry -->
+            <button onclick="showTab('mapa')" class="font-sans text-[11px] font-bold uppercase tracking-[0.25em] text-black/50 hover:text-black transition-all flex items-center gap-2 group cursor-pointer bg-transparent border-none outline-none select-none shrink-0">
+                <svg class="w-3.5 h-3.5 text-black/40 group-hover:text-black transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+                <span>Mapa</span>
+            </button>
         </header>
 
         <main class="max-w-full mx-auto">
@@ -141,7 +157,7 @@
                     <div id="general-map-container" class="mt-32 pb-20 space-y-8 animate-in fade-in duration-1000">
                         <div class="flex items-center gap-8">
                             <div class="h-px flex-1 bg-gray-100"></div>
-                            <h2 class="text-4xl md:text-6xl font-bold tracking-tight text-center font-serif whitespace-nowrap">Patrimonios en el mapa</h2>
+                            <h2 class="font-sans text-[11px] md:text-xs font-bold uppercase tracking-[0.5em] text-center text-black/40 whitespace-nowrap">Patrimonios en el mapa</h2>
                             <div class="h-px flex-1 bg-gray-100"></div>
                         </div>
                         <div id="map-general" class="h-[600px] w-full shadow-inner bg-gray-50 border border-gray-100 rounded-[3rem]"></div>
@@ -153,14 +169,101 @@
                     <div class="h-32 w-px bg-black/5 group-hover:bg-white/20"></div>
                 </div>
 
-                <div id="detail-panel" class="hidden w-full lg:w-[60%] border-l border-gray-100 bg-white h-full overflow-y-auto animate-in slide-in-from-right-full duration-700 scroll-smooth z-30 pt-[64px]">
-                    <div id="detail-content" class="px-6 md:px-[6vw] lg:px-[8vw] py-4 space-y-4">
-                        <!-- Inyectado por JS -->
-                    </div>
-                </div>
+
             </div>
         </main>
     </section>
+
+    <!-- SECCIÓN MAPA FULLSCREEN (PATRIMONIOS EN EL MAPA) -->
+    <section id="mapa" class="tab-content min-h-screen bg-white relative">
+        <header class="h-[64px] px-6 lg:px-10 border-b border-gray-100 flex justify-between items-center fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md z-[100]">
+            <!-- Unified Volver Button -->
+            <button onclick="showTab('inicio')" class="text-gray-400 hover:text-black transition-all flex items-center gap-3 group cursor-pointer bg-transparent border-none p-0 outline-none">
+                <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 12H5M12 19l-7-7 7-7"></path>
+                </svg>
+                <span class="font-sans text-[11px] font-bold uppercase tracking-[0.3em] text-black/50 group-hover:text-black transition-all">Volver</span>
+            </button>
+            
+            <!-- Elegant Title matching the copywriting and style -->
+            <span class="font-sans text-[10px] md:text-[11px] font-bold uppercase tracking-[0.5em] text-black/50 text-center select-none absolute left-1/2 -translate-x-1/2 whitespace-nowrap">
+                Patrimonios en el mapa
+            </span>
+            
+            <!-- Right side branding matching the main view -->
+            <button onclick="showTab('inicio')" class="text-2xl font-bold tracking-tighter cursor-pointer hover:text-black/40 transition-colors duration-300 shrink-0 select-none outline-none">MIRADAS</button>
+        </header>
+        
+        <!-- Fullscreen Map Container -->
+        <main class="w-full h-[calc(100vh-64px)] mt-[64px] relative">
+            <div id="map-fullpage" class="w-full h-full bg-gray-50 z-10"></div>
+        </main>
+    </section>
+
+    <!-- SECCIÓN INSTITUCIONAL / SOBRE EL PROYECTO (DARK) -->
+    <section id="informacion" class="tab-content min-h-screen bg-black text-white relative py-12 md:py-20 lg:py-24 px-6 md:px-16 lg:px-24">
+        <div class="max-w-6xl mx-auto space-y-16">
+            <!-- Header de la sección -->
+            <div class="flex justify-between items-center border-b border-white/10 pb-6">
+                <span class="font-sans text-xs font-bold uppercase tracking-[0.4em] text-white/40">Miradas — Información</span>
+                <button onclick="showTab('inicio')" class="text-white/40 hover:text-white transition-all flex items-center gap-3 group cursor-pointer bg-transparent border-none p-0 outline-none">
+                    <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 12H5M12 19l-7-7 7-7"></path>
+                    </svg>
+                    <span class="font-sans text-[11px] font-bold uppercase tracking-[0.3em] text-white/50 group-hover:text-white transition-all">Volver</span>
+                </button>
+            </div>
+
+            <!-- Contenido Conceptual -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
+                <div class="lg:col-span-5 space-y-8">
+                    <h2 class="font-sans font-bold text-4xl md:text-5xl lg:text-6xl uppercase tracking-tighter text-white leading-none">
+                        <span id="info-titulo">El Registro</span> <br><span id="info-titulo-destacado" class="text-white/45">como Legado</span>
+                    </h2>
+                    <p id="info-descripcion" class="font-sans text-sm md:text-base leading-relaxed text-white/60 font-light">
+                        La deconstrucción y conservación visual del patrimonio de Buenos Aires a través del objetivo de los estudiantes. Una perspectiva metodológica que documenta la evolución urbana, el contraste estilístico y las narrativas ocultas en las fachadas porteñas.
+                    </p>
+                    <div class="space-y-4 pt-4 border-t border-white/10">
+                        <div class="flex justify-between text-xs font-sans">
+                            <span class="opacity-40 uppercase tracking-widest">Institución</span>
+                            <span id="info-institucion" class="font-medium text-white/85">Colegio de Comunicación</span>
+                        </div>
+                        <div class="flex justify-between text-xs font-sans">
+                            <span class="opacity-40 uppercase tracking-widest">Orientación</span>
+                            <span id="info-orientacion" class="font-medium text-white/85">Producción en Medios</span>
+                        </div>
+                        <div class="flex justify-between text-xs font-sans">
+                            <span class="opacity-40 uppercase tracking-widest">Cátedra</span>
+                            <span id="info-catedra" class="font-medium text-white/85">Artes Visuales & Registro</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 space-y-6">
+                    <blockquote id="info-cita" class="text-2xl md:text-3xl lg:text-4xl font-display italic font-light text-white/95 leading-snug">
+                        “Recorrer las calles registrando el detalle, la luz y la sombra, es redescubrir la identidad colectiva que habita en los muros de nuestra ciudad.”
+                    </blockquote>
+                    <p id="info-texto-secundario" class="font-sans text-xs md:text-sm text-white/40 leading-relaxed font-light">
+                        Este espacio funciona como un archivo cartográfico interactivo, vinculando georreferencia, investigación documental e interpretación artística. Cada punto marcado representa un nodo de memoria colectiva, analizado críticamente por las nuevas miradas de nuestra comunidad educativa.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Mapa del Proyecto sin texto explícito de cartografía invertida en el divisor -->
+            <div class="space-y-6 pt-6">
+                <div class="h-px bg-white/10"></div>
+                <!-- Mapa container dark -->
+                <div id="map-about" class="h-[450px] md:h-[550px] w-full border border-white/10 bg-[#0d0d0d]"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DETAIL PANEL OVERLAY -->
+    <div id="detail-panel" class="hidden fixed inset-0 w-full h-full bg-white overflow-y-auto transition-all duration-500 ease-out transform scale-95 opacity-0 z-[1000] scroll-smooth">
+        <div id="detail-content" class="px-6 md:px-[10vw] lg:px-[15vw] py-12 md:py-20 lg:py-24 space-y-12">
+            <!-- Inyectado por JS -->
+        </div>
+    </div>
 
     <!-- FULLSCREEN IMAGE OVERLAY -->
     <div id="fullscreen-overlay" class="fixed inset-0 z-[200] bg-black opacity-0 pointer-events-none transition-opacity duration-500 flex flex-col items-center justify-center">

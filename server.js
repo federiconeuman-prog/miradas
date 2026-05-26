@@ -58,6 +58,38 @@ async function fetchSheet(tabName) {
 
 let cache = null;
 
+function parseInfoProyecto(rows) {
+  if (!rows || rows.length === 0) return {};
+  
+  // Buscar columnas de clave-valor flexibles
+  const sample = rows[0];
+  const keys = Object.keys(sample);
+  const keyCol = keys.find(k => ['clave', 'campo', 'key', 'propiedad', 'id'].includes(k.toLowerCase().trim()));
+  const valCol = keys.find(k => ['valor', 'value', 'contenido', 'texto'].includes(k.toLowerCase().trim()));
+  
+  if (keyCol && valCol) {
+    const result = {};
+    rows.forEach(r => {
+      const k = String(r[keyCol] || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9_]/g, '');
+      if (k) result[k] = r[valCol] ?? '';
+    });
+    return result;
+  }
+  
+  // Si es fila única con columnas estándar
+  return rows[0];
+}
+
+function isNotHomePrincipal(rows) {
+  if (!rows || rows.length === 0) return true;
+  const sample = rows[0];
+  const keys = Object.keys(sample).map(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, ''));
+  if (keys.includes('ano') || keys.includes('year') || keys.includes('estado')) {
+    return false;
+  }
+  return true;
+}
+
 async function buildCache() {
   console.log('[Sheets] Cargando datos...');
   const colecciones = await fetchSheet('home_principal');
@@ -73,7 +105,30 @@ async function buildCache() {
     yearData[year] = { hitos, textos, fotos };
   }
 
-  cache = { colecciones, yearData, loadedAt: new Date().toISOString() };
+  const fetchWithCheck = async (tabName) => {
+    const data = await fetchSheet(tabName);
+    if (!isNotHomePrincipal(data)) {
+      throw new Error(`[Sheets] Gviz retornó home_principal por defecto para pestaña no encontrada "${tabName}"`);
+    }
+    return data;
+  };
+
+  // Buscar fotos de la portada (letras MIRADAS) en varias solapas posibles de manera robusta
+  const fotosPortada = await fetchWithCheck('portada_fotos')
+    .catch(() => fetchWithCheck('fotos_portada')
+      .catch(() => fetchWithCheck('letras_portada')
+        .catch(() => [])));
+
+  // Buscar sección "Sobre el proyecto" en varias solapas posibles de manera robusta
+  const infoProyectoRaw = await fetchWithCheck('info_proyecto')
+    .catch(() => fetchWithCheck('sobre_el_proyecto')
+      .catch(() => fetchWithCheck('informacion')
+        .catch(() => fetchWithCheck('informacion_proyecto')
+          .catch(() => []))));
+
+  const infoProyecto = parseInfoProyecto(infoProyectoRaw);
+
+  cache = { colecciones, yearData, fotosPortada, infoProyecto, loadedAt: new Date().toISOString() };
   console.log(`[Sheets] OK — años cargados: ${years.join(', ')}`);
 }
 
@@ -84,13 +139,45 @@ async function getCache() {
 
 // ── Rutas API ────────────────────────────────────────────────────────────────
 
+// Fotos de portada / letras dinamicas
+app.get('/api/landing-photos', async (req, res) => {
+  try {
+    const { fotosPortada } = await getCache();
+    res.json(fotosPortada || []);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error cargando fotos de portada' });
+  }
+});
+
+// Información sobre el proyecto (editable desde el Excel)
+app.get('/api/info-proyecto', async (req, res) => {
+  try {
+    const { infoProyecto } = await getCache();
+    const fallback = {
+      titulo: 'El Registro',
+      titulo_destacado: 'como Legado',
+      descripcion: 'La deconstrucción y conservación visual del patrimonio de Buenos Aires a través del objetivo de los estudiantes. Una perspectiva metodológica que documenta la evolución urbana, el contraste estilístico y las narrativas ocultas en las fachadas porteñas.',
+      cita: '“Recorrer las calles registrando el detalle, la luz y la sombra, es redescubrir la identidad colectiva que habita en los muros de nuestra ciudad.”',
+      texto_secundario: 'Este espacio funciona como un archivo cartográfico interactivo, vinculando georreferencia, investigación documental e interpretación artística. Cada punto marcado representa un nodo de memoria colectiva, analizado críticamente por las nuevas miradas de nuestra comunidad educativa.',
+      institucion: 'Colegio de Comunicación',
+      orientacion: 'Producción en Medios',
+      catedra: 'Artes Visuales & Registro'
+    };
+    res.json({ ...fallback, ...infoProyecto });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error cargando información de la sección' });
+  }
+});
+
 // Colecciones (años disponibles)
 app.get('/api/collections', async (req, res) => {
   try {
     const { colecciones } = await getCache();
     const result = {};
     colecciones.forEach(c => {
-      if (c.año) result[c.año] = { titulo: c.titulo, imagen: c.imagen, estado: c.estado };
+      if (c.año) result[c.año] = { ...c };
     });
     res.json(result);
   } catch (e) {
@@ -240,6 +327,14 @@ app.post('/api/refresh', async (req, res) => {
     console.error(e);
     res.status(500).json({ error: 'Error al actualizar: ' + e.message });
   }
+});
+
+// Wildcard fallback to serve index.html for clean client routes
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/') || req.path.includes('.')) {
+    return next();
+  }
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // ── Inicio ───────────────────────────────────────────────────────────────────
