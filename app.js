@@ -39,6 +39,17 @@ async function loadData() {
             console.warn('No se pudieron cargar las fotos de portada', landingErr);
         }
 
+        // Cargar sección de muestra física
+        try {
+            const muestraRes = await fetch('/api/muestra-fisica');
+            if (muestraRes.ok) {
+                const muestraData = await muestraRes.json();
+                renderMuestraFisica(muestraData);
+            }
+        } catch (muestraErr) {
+            console.warn('No se pudo cargar la sección de muestra física', muestraErr);
+        }
+
         // Inicializar sección y estado según URL actual en la carga inicial de la página
         const p = window.location.pathname;
         const params = new URLSearchParams(window.location.search);
@@ -122,7 +133,7 @@ function renderLandingPhotos(photos) {
 
         // Si encontramos una URL, la aplicamos
         if (targetUrl) {
-            const directLink = getDriveDirectLink(targetUrl);
+            const directLink = getDriveDirectLink(targetUrl, 'w400');
             span.style.setProperty('--img', `url('${directLink}')`);
         }
     });
@@ -145,7 +156,7 @@ async function renderYears(collections) {
 
     // Precargar imágenes antes de renderizar para que estén en caché
     await Promise.all(years.map(year => new Promise(resolve => {
-        const src = getDriveDirectLink(collections[year].imagen);
+        const src = getDriveDirectLink(collections[year].imagen, 'w1200');
         if (!src) return resolve();
         const img = new Image();
         img.onload = resolve;
@@ -155,12 +166,12 @@ async function renderYears(collections) {
 
     container.innerHTML = years.map(year => {
         const c = collections[year];
-        const src = getDriveDirectLink(c.imagen);
+        const src = getDriveDirectLink(c.imagen, 'w1200');
         const isActive = c.estado === 'activo';
         return `
             <button ${isActive ? `onclick="showTab('hitos', ${year})"` : ''} class="group relative flex flex-col items-center p-12 md:p-16 max-w-3xl overflow-hidden rounded-2xl ${isActive ? 'cursor-pointer' : 'opacity-20 grayscale cursor-default pointer-events-none'}">
                 <!-- Project Image Reveal -->
-                <div class="absolute inset-2 opacity-0 group-hover:opacity-60 transition-all duration-1000 pointer-events-none overflow-hidden grayscale">
+                <div class="absolute inset-2 opacity-[0.24] md:opacity-[0.28] group-hover:opacity-[0.65] transition-all duration-1000 pointer-events-none overflow-hidden grayscale">
                     <img src="${src}"
                          class="w-full h-full object-cover scale-150 group-hover:scale-110 transition-transform duration-[8000ms] ease-out"
                          alt="${c.titulo || 'Proyecto Miradas'}">
@@ -183,15 +194,23 @@ async function renderYears(collections) {
             </button>
         `;
     }).join('') + `
-        <!-- Elegant 'Muestra en la escuela — Próximamente' indicator -->
-        <div class="flex flex-col items-center p-6 w-full max-w-sm rounded-[1.5rem] border border-black/[0.04] bg-black/[0.01] opacity-25 select-none text-center transition-all duration-300 hover:opacity-40 mt-4">
-            <span class="font-sans text-[9px] font-bold uppercase tracking-[0.4em] text-black/40 mb-1">Muestra física</span>
-            <h3 class="font-sans text-sm font-semibold uppercase tracking-wider text-black/60 mb-0.5">
-                En la escuela
-            </h3>
-            <p class="font-sans text-[9px] uppercase tracking-[0.2em] text-black/40">
-                Próximamente
-            </p>
+        <!-- Elegant 'Muestra en la escuela — Próximamente' indicator (Muestra indicator with horizontal lines in the sides and prominent arrow) -->
+        <div class="group flex items-center justify-center gap-4 sm:gap-6 md:gap-8 mt-16 mb-12 select-none text-center mx-auto w-full max-w-sm px-4">
+            <div class="h-px w-8 sm:w-12 md:w-16 bg-black/10 group-hover:w-16 sm:group-hover:w-24 md:group-hover:w-36 group-hover:bg-black/35 transition-all duration-700 shrink-0"></div>
+            <button onclick="showTab('muestra')" class="font-sans py-4 flex flex-col items-center gap-2 cursor-pointer bg-transparent border-none outline-none select-none transition-all duration-700 shrink-0">
+                <span class="text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-black/30 group-hover:text-black/50 transition-colors duration-500">Muestra física</span>
+                <h3 class="text-xs md:text-sm font-semibold uppercase tracking-[0.3em] text-black/40 group-hover:text-black transition-colors duration-500 my-1 pb-0.5">
+                    En la escuela
+                </h3>
+                <p class="text-[9px] uppercase tracking-[0.4em] text-black/25 group-hover:text-black/45 transition-colors duration-500">
+                    Próximamente
+                </p>
+                <div class="mt-4 flex flex-col items-center gap-2 text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-black/20 group-hover:text-black/85 transition-colors duration-500">
+                    <span>Ver Muestra</span>
+                    <span class="text-xl md:text-2xl font-light transform group-hover:translate-y-2 transition-all duration-500 leading-none select-none">&darr;</span>
+                </div>
+            </button>
+            <div class="h-px w-8 sm:w-12 md:w-16 bg-black/10 group-hover:w-16 sm:group-hover:w-24 md:group-hover:w-36 group-hover:bg-black/35 transition-all duration-700 shrink-0"></div>
         </div>
     `;
 }
@@ -289,6 +308,177 @@ function parseSimpleMinimarkdownDark(text) {
     return safeText;
 }
 
+window.scrollCarousel = function(containerId, direction) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const slideWidth = container.clientWidth;
+    container.scrollBy({ left: slideWidth * direction, behavior: 'smooth' });
+};
+
+// Actualiza la sección de la Muestra Física
+function renderMuestraFisica(data) {
+    if (!data) return;
+
+    if (!Array.isArray(data)) data = [data];
+
+    const container = document.getElementById('muestra-gallery');
+    const navContainer = document.getElementById('muestra-carousel-nav');
+    if (!container) return; // Wait until DOM is available
+
+    // Filter valid items correctly preventing whitespace-only empty rows
+    const validItems = data.filter(item => Object.values(item).some(val => val && String(val).trim() !== ''));
+
+    // Reset container contents completely to avoid duplicate overlapping
+    container.innerHTML = '';
+    if (navContainer) {
+        navContainer.innerHTML = '';
+        if (validItems.length > 1) {
+            navContainer.classList.remove('hidden');
+        } else {
+            navContainer.classList.add('hidden');
+        }
+    }
+
+    if (validItems.length === 0) {
+        // Fallback for an empty spreadsheet or no physical sample details
+        container.innerHTML = `
+            <div class="w-full max-w-2xl shrink-0 snap-center flex flex-col items-center justify-center mx-auto aspect-video rounded-3xl border border-[#2d1b40]/10 bg-white/40 shadow-sm relative group/empty transition-all">
+                <div class="w-16 h-16 border border-[#2d1b40]/15 rounded-full flex items-center justify-center mx-auto mb-4 relative bg-[#fdfbfd]">
+                    <span class="text-2xl text-[#2d1b40]/40 font-light">⧖</span>
+                </div>
+                <span class="text-[10px] md:text-[11px] font-sans tracking-[0.4em] font-semibold uppercase text-[#2d1b40]/40">Próximamente</span>
+                <p class="font-sans text-xs md:text-sm text-[#2d1b40]/50 mt-3 max-w-[280px] md:max-w-sm text-center leading-relaxed">El registro audiovisual de la exposición estará disponible en este espacio.</p>
+            </div>
+        `;
+        return;
+    }
+
+    const getKey = (item, possibleKeys) => {
+        const keys = Object.keys(item);
+        const match = keys.find(k => {
+            const normKey = String(k).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
+            return possibleKeys.some(p => normKey.includes(p));
+        });
+        return match ? item[match] : '';
+    };
+
+    validItems.forEach((item, index) => {
+        const urlRaw = getKey(item, ['url', 'link', 'video', 'imagen', 'foto', 'enlace', 'archivo']);
+        const url = (typeof urlRaw === 'string') ? urlRaw.trim() : '';
+        const tipoRaw = getKey(item, ['tipo', 'type', 'formato']);
+        const tipo = (typeof tipoRaw === 'string' && tipoRaw.trim()) ? tipoRaw.toLowerCase() : '';
+        
+        const isVideo = tipo.includes('video') || (url && (url.includes('youtube') || url.includes('youtu.be') || url.includes('vimeo') || url.includes('drive.google.com/file')));
+        const isFoto = !isVideo && (tipo.includes('foto') || tipo.includes('img') || tipo.includes('imagen') || (url && url.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null));
+        
+        const finalType = isVideo ? 'video' : (isFoto ? 'foto' : (url ? 'link' : 'empty'));
+
+        const tituloRaw = getKey(item, ['titulo', 'title', 'nombre', 'encabezado']);
+        const titulo = (typeof tituloRaw === 'string') ? tituloRaw.trim() : '';
+        const descripcionRaw = getKey(item, ['descripcion', 'texto', 'detalle', 'info', 'bajada']);
+        const descripcion = (typeof descripcionRaw === 'string') ? descripcionRaw.trim() : '';
+
+        let mediaHtml = '';
+
+        if (url) {
+            if (finalType === 'video') {
+                let embedUrl = url;
+                if (url.includes('youtube.com/watch')) {
+                    const urlParams = new URL(url).searchParams;
+                    const videoId = urlParams.get('v');
+                    if (videoId) embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0`;
+                } else if (url.includes('youtu.be/')) {
+                    const videoId = url.split('youtu.be/')[1].split('?')[0];
+                    if (videoId) embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0`;
+                } else if (url.includes('drive.google.com/file/d/')) {
+                    const driveIdMatch = url.match(/\/d\/(.+?)\//);
+                    if (driveIdMatch) embedUrl = `https://drive.google.com/file/d/${driveIdMatch[1]}/preview`;
+                }
+                
+                mediaHtml = `
+                    <div class="aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-lg border border-[#2d1b40]/10 flex items-center justify-center">
+                        <iframe src="${embedUrl}" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                `;
+            } else if (finalType === 'foto') {
+                 mediaHtml = `
+                    <div class="aspect-[4/3] md:aspect-[3/2] lg:aspect-video w-full rounded-2xl overflow-hidden bg-[#2d1b40]/5 shadow-sm border border-[#2d1b40]/10 relative group bg-cover bg-center">
+                        <img src="${url.includes('drive.google.com') ? getDriveDirectLink(url, 'w1200') : url}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105" alt="${titulo || 'Registro Fotográfico de Exposición'}" loading="lazy" />
+                    </div>
+                 `;
+            } else {
+                 mediaHtml = `
+                    <a href="${url}" target="_blank" rel="noopener noreferrer" class="aspect-video w-full rounded-2xl bg-[#fdfbfd]/50 shadow-sm border border-[#6d4d8c]/15 hover:bg-white hover:border-[#6d4d8c]/40 hover:shadow-md transition-all flex flex-col items-center justify-center gap-4 group">
+                        <div class="w-12 h-12 rounded-full border border-[#6d4d8c]/20 bg-white flex items-center justify-center group-hover:-translate-y-1 group-hover:scale-110 transition-transform">
+                            <span class="text-xl rotate-45 transform text-[#6d4d8c]">&uarr;</span>
+                        </div>
+                        <span class="font-sans text-[10px] uppercase tracking-[0.2em] text-[#6d4d8c]/80 font-semibold">Abrir Enlace</span>
+                    </a>
+                 `;
+            }
+        } else {
+            mediaHtml = `
+                <div class="aspect-video w-full rounded-2xl overflow-hidden bg-white/40 shadow-sm border border-[#2d1b40]/10 flex flex-col items-center justify-center relative">
+                    <div class="w-12 h-12 rounded-full border border-[#2d1b40]/10 flex items-center justify-center mb-3">
+                        <span class="text-[#2d1b40]/20 text-xl font-light">⧖</span>
+                    </div>
+                    <span class="text-[9px] md:text-[10px] font-sans tracking-[0.3em] font-semibold uppercase text-[#2d1b40]/40 text-center px-4">Próximamente</span>
+                </div>
+            `;
+        }
+
+        const infoHtml = (titulo || descripcion) ? `
+            <div class="mt-5 text-center px-2 md:px-4 max-w-2xl mx-auto pt-4 border-t border-[#2d1b40]/5">
+                ${titulo ? `<h3 class="font-bold text-[18px] md:text-[20px] font-display text-[#2d1b40] tracking-tight leading-tight">${titulo}</h3>` : ''}
+                ${descripcion ? `<div class="text-[12px] md:text-[13px] font-sans text-[#2d1b40]/50 leading-relaxed mt-2">${parseSimpleMinimarkdown(descripcion)}</div>` : ''}
+            </div>
+        ` : '';
+
+        // Add to carousel
+        const slideContainer = document.createElement('div');
+        // Standard full width sizing for a clean 1-item carousel
+        slideContainer.className = `shrink-0 snap-center flex flex-col pt-2 transition-all w-full px-2 md:px-12 relative`;
+        slideContainer.innerHTML = `
+            ${mediaHtml}
+            ${infoHtml}
+        `;
+        container.appendChild(slideContainer);
+
+        // Populate navigation pagination dots natively reacting to scroll 
+        if (validItems.length > 1 && navContainer) {
+            const dot = document.createElement('button');
+            dot.className = `h-1.5 rounded-full transition-all duration-500 ${index === 0 ? 'bg-[#6d4d8c] w-6' : 'bg-[#2d1b40]/15 hover:bg-[#6d4d8c]/40 w-1.5'}`;
+            dot.onclick = () => {
+                const scrollPos = slideContainer.offsetLeft - (container.clientWidth / 2) + (slideContainer.clientWidth / 2);
+                container.scrollTo({ left: scrollPos, behavior: 'smooth' });
+            };
+            navContainer.appendChild(dot);
+        }
+    });
+
+    // Scroll listener calculates center-most slide iteratively 
+    if (validItems.length > 1 && navContainer) {
+        container.addEventListener('scroll', () => {
+             const centerContainer = container.scrollLeft + (container.clientWidth / 2);
+             let activeIndex = 0;
+             let minDiff = Infinity;
+
+             Array.from(container.children).forEach((slide, idx) => {
+                 const centerSlide = slide.offsetLeft + (slide.clientWidth / 2);
+                 const diff = Math.abs(centerContainer - centerSlide);
+                 if (diff < minDiff) {
+                     minDiff = diff;
+                     activeIndex = idx;
+                 }
+             });
+
+             Array.from(navContainer.children).forEach((dot, index) => {
+                 dot.className = index === activeIndex ? 'h-1.5 rounded-full transition-all duration-300 bg-[#6d4d8c] w-6' : 'h-1.5 rounded-full transition-all duration-300 bg-[#2d1b40]/15 hover:bg-[#6d4d8c]/40 w-1.5';
+             });
+        }, { passive: true });
+    }
+}
+
 function updateInfoTexts(data) {
     if (!data) return;
 
@@ -360,6 +550,84 @@ function updateInfoTexts(data) {
          const el = document.getElementById('info-catedra');
          if (el) el.innerHTML = parseSimpleMinimarkdownDark(cat);
     }
+
+    // Extraer campos específicos de la Muestra Física
+    const mTitle = getVal(['muestratitulo', 'titulo_muestra', 'muestranombre', 'muestra_titulo']);
+    const mSub = getVal(['muestrasubtitulo', 'subtitulo_muestra', 'muestrasub', 'muestra_subtitulo']);
+    const mCita = getVal(['muestracita', 'cita_muestra', 'frase_muestra', 'muestra_cita']);
+    const mDesc = getVal(['muestradescripcion', 'descripcion_muestra', 'muestratexto', 'muestra_descripcion']);
+    const mVideo = getVal(['muestravideo', 'video_muestra', 'videomuestra', 'video', 'video_url', 'muestra_video_url']);
+
+    if (mTitle) {
+        const el = document.getElementById('muestra-titulo');
+        if (el) el.innerHTML = parseSimpleMinimarkdownDark(mTitle);
+    }
+    if (mSub) {
+        const el = document.getElementById('muestra-subtitulo');
+        if (el) el.innerHTML = parseSimpleMinimarkdownDark(mSub);
+    }
+    if (mCita) {
+        const el = document.getElementById('muestra-cita');
+        if (el) el.innerHTML = parseSimpleMinimarkdownDark(mCita);
+    }
+    if (mDesc) {
+        const el = document.getElementById('muestra-descripcion');
+        if (el) el.innerHTML = parseSimpleMinimarkdownDark(mDesc);
+    }
+
+    // Embed connected Video if link is provided, or show placeholder if empty or says "próximamente"
+    const videoUrl = mVideo ? String(mVideo).trim() : '';
+    const isProximamente = !videoUrl || videoUrl.toLowerCase().includes('proximamente') || videoUrl.toLowerCase().includes('próximamente') || videoUrl.toLowerCase() === 'no' || videoUrl.toLowerCase() === 'por venir';
+    
+    const placeholderEl = document.getElementById('muestra-video-placeholder');
+    const playerEl = document.getElementById('muestra-video-player');
+    const iframeEl = document.getElementById('muestra-iframe');
+
+    if (isProximamente) {
+        if (placeholderEl) placeholderEl.classList.remove('hidden');
+        if (playerEl) playerEl.classList.add('hidden');
+        if (iframeEl) iframeEl.removeAttribute('src');
+    } else {
+        // Resolve embed link
+        let embedUrl = '';
+        
+        // YouTube Support
+        let ytMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i);
+        if (ytMatch && ytMatch[1]) {
+            embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
+        }
+        
+        // Vimeo Support
+        if (!embedUrl) {
+            let vimeoMatch = videoUrl.match(/(?:vimeo\.com\/)(?:video\/)?([0-9]+)/i);
+            if (vimeoMatch && vimeoMatch[1]) {
+                embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+            }
+        }
+        
+        // Google Drive Support
+        if (!embedUrl) {
+            let driveMatch = videoUrl.match(/\/(?:file\/)?d\/([a-zA-Z0-9_-]+)/);
+            if (driveMatch && driveMatch[1]) {
+                embedUrl = `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+            }
+        }
+
+        // If not any, use raw url as fallback
+        if (!embedUrl) {
+            embedUrl = videoUrl;
+        }
+
+        if (embedUrl) {
+            if (iframeEl) iframeEl.src = embedUrl;
+            if (placeholderEl) placeholderEl.classList.add('hidden');
+            if (playerEl) playerEl.classList.remove('hidden');
+        } else {
+            if (placeholderEl) placeholderEl.classList.remove('hidden');
+            if (playerEl) playerEl.classList.add('hidden');
+            if (iframeEl) iframeEl.removeAttribute('src');
+        }
+    }
 }
 
 function getActiveBuildings() {
@@ -379,13 +647,48 @@ function showTab(id, year = null, pushHistory = true) {
         if (logo) logo.textContent = `MIRADAS`;
     }
 
+    const grid = document.getElementById('spatial-grid');
+    const isSpatialTab = ['inicio', 'informacion', 'muestra'].includes(id);
+
+    if (grid) {
+        if (isSpatialTab) {
+            grid.style.display = 'grid';
+            void grid.offsetWidth; // Force reflow
+            grid.classList.remove('inactive');
+            
+            if (id === 'inicio') {
+                grid.style.transform = 'translate3d(0vw, 0vh, 0)';
+            } else if (id === 'informacion') {
+                grid.style.transform = 'translate3d(-100vw, 0vh, 0)';
+            } else if (id === 'muestra') {
+                grid.style.transform = 'translate3d(0vw, -100vh, 0)';
+            }
+        } else {
+            grid.classList.add('inactive');
+            setTimeout(() => {
+                const currentTab = document.querySelector('.tab-content.active')?.id;
+                if (!['inicio', 'informacion', 'muestra'].includes(currentTab)) {
+                    grid.style.display = 'none';
+                }
+            }, 1000);
+        }
+    }
+
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     
     const element = document.getElementById(id);
     if (element) {
         element.classList.add('active');
     }
-    window.scrollTo(0, 0);
+
+    if (isSpatialTab) {
+        const gridScreen = document.getElementById(id);
+        if (gridScreen) {
+            gridScreen.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
     
     if (id === 'hitos') {
         renderCollection();
@@ -396,7 +699,11 @@ function showTab(id, year = null, pushHistory = true) {
         setTimeout(() => {
             initAboutMap();
             if (mapAbout) {
-                mapAbout.invalidateSize();
+                if (typeof mapAbout.invalidateSize === 'function') {
+                    mapAbout.invalidateSize();
+                } else if (typeof mapAbout.resize === 'function') {
+                    mapAbout.resize();
+                }
             }
         }, 150);
     } else if (id === 'mapa') {
@@ -414,6 +721,7 @@ function showTab(id, year = null, pushHistory = true) {
         else if (id === 'hitos') path = '/hitos';
         else if (id === 'mapa') path = '/mapa';
         else if (id === 'informacion') path = '/informacion';
+        else if (id === 'muestra') path = '/muestra';
         
         // Preserve any custom query params if present (like ?clave=...)
         const params = new URLSearchParams(window.location.search);
@@ -586,12 +894,13 @@ document.getElementById('detail-panel')?.addEventListener('scroll', (e) => handl
 document.getElementById('grid-container')?.addEventListener('scroll', (e) => handleHeaderScroll(e.target.scrollTop, 'grid'));
 
 // VISTA DETALLE
-function getDriveDirectLink(url) {
+function getDriveDirectLink(url, sz = null) {
     if (!url) return '';
+    let qs = sz ? `?sz=${sz}` : '';
     let match = url.match(/\/(?:file\/)?d\/([a-zA-Z0-9_-]+)/);
-    if (match && match[1]) return `/api/image/${match[1]}`;
+    if (match && match[1]) return `/api/image/${match[1]}${qs}`;
     match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    if (match && match[1]) return `/api/image/${match[1]}`;
+    if (match && match[1]) return `/api/image/${match[1]}${qs}`;
     return url;
 }
 
@@ -705,6 +1014,7 @@ async function showDetail(id, isFromMap = false, pushHistory = true) {
                                         <img src="${src}"
                                              class="max-w-full max-h-full object-contain select-none ${i === 0 ? '' : 'opacity-0'} transition-opacity duration-500"
                                              draggable="false"
+                                             ${i === 0 ? '' : 'loading="lazy"'}
                                              onload="this.classList.remove('opacity-0')"
                                              onerror="this.src='https://picsum.photos/seed/broken/1200/800?grayscale'; this.onerror=null; this.onload=()=>this.classList.remove('opacity-0')">
                                         <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300">
@@ -717,12 +1027,12 @@ async function showDetail(id, isFromMap = false, pushHistory = true) {
                                     
                             <!-- Controls -->
                             <div class="absolute inset-y-0 left-0 flex items-center z-10 pointer-events-none px-2 lg:px-6">
-                                <button onclick="stopProp(event); moveCarousel(-1)" class="w-12 h-12 flex items-center justify-center text-black/10 hover:text-black transition-all active:scale-75 pointer-events-auto cursor-pointer">
+                                <button onclick="stopProp(event); moveCarousel(-1)" class="w-12 h-12 flex items-center justify-center text-black/50 hover:text-black transition-all active:scale-75 pointer-events-auto cursor-pointer drop-shadow-sm">
                                     <span class="text-6xl font-thin leading-none">‹</span>
                                 </button>
                             </div>
                             <div class="absolute inset-y-0 right-0 flex items-center z-10 pointer-events-none px-2 lg:px-6">
-                                <button onclick="stopProp(event); moveCarousel(1)" class="w-12 h-12 flex items-center justify-center text-black/10 hover:text-black transition-all active:scale-75 pointer-events-auto cursor-pointer">
+                                <button onclick="stopProp(event); moveCarousel(1)" class="w-12 h-12 flex items-center justify-center text-black/50 hover:text-black transition-all active:scale-75 pointer-events-auto cursor-pointer drop-shadow-sm">
                                     <span class="text-6xl font-thin leading-none">›</span>
                                 </button>
                             </div>
@@ -888,12 +1198,12 @@ function renderPublicGrid(data = null) {
         <div onclick="showDetail('${b.id}')" class="group cursor-pointer bg-white p-4 md:p-6 hover:bg-gray-50/50 transition-all duration-300 overflow-hidden relative">
             <div class="space-y-4 h-full">
                 <div class="w-full aspect-video overflow-hidden rounded-xl md:rounded-2xl bg-gray-50 shrink-0">
-                    <img src="${getDriveDirectLink(b.imageUrl) || `https://picsum.photos/seed/${b.id}/800/600?grayscale`}"
+                    <img src="${getDriveDirectLink(b.imageUrl, 'w600') || `https://picsum.photos/seed/${b.id}/600/400?grayscale`}"
                          class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 grayscale opacity-0"
                          alt="${b.name}"
                          loading="lazy"
                          onload="this.classList.remove('opacity-0')"
-                         onerror="this.src='https://picsum.photos/seed/${b.id}/800/600?grayscale'; this.onerror=null; this.onload=()=>this.classList.remove('opacity-0')">
+                         onerror="this.src='https://picsum.photos/seed/${b.id}/600/400?grayscale'; this.onerror=null; this.onload=()=>this.classList.remove('opacity-0')">
                 </div>
                 <div class="py-1 text-center flex-1 min-w-0">
                     <h3 class="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-black uppercase truncate w-full mb-1">${b.name}</h3>
@@ -965,9 +1275,32 @@ function initDetailMap(lat, lng, name) {
     }).addTo(mapDetail);
     
     setTimeout(() => {
-        if(mapDetail) mapDetail.invalidateSize();
+        if (mapDetail) mapDetail.invalidateSize();
     }, 500);
 }
+
+const darkVectorStyle = {
+    "version": 8,
+    "sources": {
+        "carto-dark": {
+            "type": "raster",
+            "tiles": [
+                "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            ],
+            "tileSize": 256,
+            "attribution": "© OpenStreetMap contributors, © CARTO"
+        }
+    },
+    "layers": [
+        {
+            "id": "carto-dark-layer",
+            "type": "raster",
+            "source": "carto-dark",
+            "minzoom": 0,
+            "maxzoom": 20
+        }
+    ]
+};
 
 function initAboutMap(data = null) {
     if (data === null) data = buildings;
@@ -980,11 +1313,15 @@ function initAboutMap(data = null) {
         mapAbout = L.map('map-about', { 
             zoomControl: false,
             scrollWheelZoom: false,
-            attributionControl: false 
+            doubleClickZoom: false,
+            boxZoom: false,
+            dragging: true,
+            attributionControl: false
         }).setView([-34.6037, -58.3816], 13);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(mapAbout);
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(mapAbout);
     }
-    
+
     mapAbout.eachLayer((layer) => {
         if (layer instanceof L.CircleMarker) mapAbout.removeLayer(layer);
     });
@@ -994,19 +1331,19 @@ function initAboutMap(data = null) {
             radius: 8,
             fillColor: "#000",
             color: "#fff",
-            weight: 3,
+            weight: 2,
             opacity: 1,
-            fillOpacity: 0.85
+            fillOpacity: 1
         }).addTo(mapAbout);
         
         m.on('click', () => {
             showTab('hitos', b.collectionYear);
             setTimeout(() => {
-                showDetail(b.id);
+                showDetail(b.id, true);
             }, 300);
         });
         
-        m.bindPopup(`<b class="font-sans text-[12px] uppercase tracking-widest text-black">${b.name}</b>`, { closeButton: false });
+        m.bindPopup(`<b class="font-sans text-[12px] uppercase tracking-widest text-[#0f131b] px-0.5 font-bold">${b.name}</b>`, { closeButton: false, offset: [0, -5] });
         m.on('mouseover', function() { this.openPopup(); });
         m.on('mouseout', function() { this.closePopup(); });
     });
@@ -1085,6 +1422,7 @@ function openFullscreen(index, pushHistory = true) {
                     <img src="${src}"
                          class="max-w-full max-h-full m-auto object-contain select-none shadow-[20px_20px_60px_rgba(0,0,0,0.6)] opacity-0 transition-opacity duration-500"
                          draggable="false"
+                         loading="lazy"
                          onload="this.classList.remove('opacity-0')"
                          onerror="this.src='https://picsum.photos/seed/broken/1600/1200?grayscale'; this.onerror=null; this.onload=()=>this.classList.remove('opacity-0')">
                 </div>
@@ -1098,8 +1436,8 @@ function openFullscreen(index, pushHistory = true) {
         const controls = document.createElement('div');
         controls.className = "fullscreen-controls absolute inset-0 flex items-center justify-between z-20 pointer-events-none px-4 lg:px-12";
         controls.innerHTML = `
-            <button onclick="moveFullscreenCarousel(-1)" class="w-24 h-24 flex items-center justify-center text-white/5 hover:text-white transition-all text-8xl font-thin select-none cursor-pointer pointer-events-auto active:scale-75">‹</button>
-            <button onclick="moveFullscreenCarousel(1)" class="w-24 h-24 flex items-center justify-center text-white/5 hover:text-white transition-all text-8xl font-thin select-none cursor-pointer pointer-events-auto active:scale-75">›</button>
+            <button onclick="moveFullscreenCarousel(-1)" class="w-24 h-24 flex items-center justify-center text-white/50 hover:text-white transition-all text-8xl font-thin select-none cursor-pointer pointer-events-auto active:scale-75 drop-shadow-md">‹</button>
+            <button onclick="moveFullscreenCarousel(1)" class="w-24 h-24 flex items-center justify-center text-white/50 hover:text-white transition-all text-8xl font-thin select-none cursor-pointer pointer-events-auto active:scale-75 drop-shadow-md">›</button>
         `;
         overlay.appendChild(controls);
     
@@ -1216,6 +1554,7 @@ if (!window.history.state) {
     if (p === '/hitos') initialTab = 'hitos';
     else if (p === '/mapa') initialTab = 'mapa';
     else if (p === '/informacion') initialTab = 'informacion';
+    else if (p === '/muestra') initialTab = 'muestra';
 
     window.history.replaceState({ 
         tab: initialTab, 
@@ -1284,6 +1623,75 @@ window.addEventListener('popstate', (event) => {
 });
 
 loadData();
+
+// Spatial swipe gesture support for mobile devices
+(function() {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const SWIPE_THRESHOLD = 70;
+
+    document.addEventListener('touchstart', (e) => {
+        const activeTab = document.querySelector('.tab-content.active')?.id;
+        if (!['inicio', 'informacion', 'muestra'].includes(activeTab)) return;
+        
+        // Prevent interference with maps, search elements, input forms, or overlays
+        if (e.target.closest('#map-about') || 
+            e.target.closest('.leaflet-container') || 
+            e.target.closest('#search-input') || 
+            e.target.closest('#detail-container') ||
+            e.target.closest('button') ||
+            e.target.closest('a')) {
+            return;
+        }
+        
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+        const activeTab = document.querySelector('.tab-content.active')?.id;
+        if (!['inicio', 'informacion', 'muestra'].includes(activeTab)) return;
+        
+        if (e.target.closest('#map-about') || 
+            e.target.closest('.leaflet-container') || 
+            e.target.closest('#search-input') || 
+            e.target.closest('#detail-container') ||
+            e.target.closest('button') ||
+            e.target.closest('a')) {
+            return;
+        }
+
+        const touchEndX = e.changedTouches[0].screenX;
+        const touchEndY = e.changedTouches[0].screenY;
+
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+
+        // Discard very short taps or noise
+        if (Math.abs(diffX) < SWIPE_THRESHOLD && Math.abs(diffY) < SWIPE_THRESHOLD) return;
+
+        // Determine main axis: Horizontal vs Vertical
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+            // Horizontal navigation (X-axis)
+            if (activeTab === 'inicio' && diffX < -SWIPE_THRESHOLD) {
+                // Swipe left -> Pan right to Información
+                showTab('informacion');
+            } else if (activeTab === 'informacion' && diffX > SWIPE_THRESHOLD) {
+                // Swipe right -> Pan left to Inicio
+                showTab('inicio');
+            }
+        } else {
+            // Vertical navigation (Y-axis)
+            if (activeTab === 'inicio' && diffY < -SWIPE_THRESHOLD) {
+                // Swipe up -> Pan down to Muestra
+                showTab('muestra');
+            } else if (activeTab === 'muestra' && diffY > SWIPE_THRESHOLD) {
+                // Swipe down -> Pan up to Inicio
+                showTab('inicio');
+            }
+        }
+    }, { passive: true });
+})();
 
 // Botón de actualizar — solo visible con ?clave=XXXX en la URL
 const _clave = new URLSearchParams(window.location.search).get('clave');

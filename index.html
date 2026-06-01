@@ -4,24 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proyecto Miradas 2026</title>
+    <link rel="preload" href="https://upload.wikimedia.org/wikipedia/commons/e/ea/Plano_de_la_Ciudad_de_Buenos_Aires_-_1900.jpg" as="image">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- MapLibre GL -->
+    <link href="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <style>
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
         body { font-family: 'Cormorant Garamond', serif; }
         .font-sans { font-family: 'Inter', sans-serif; }
         .font-display { font-family: 'Playfair Display', serif; }
         #map-general, #map-detail { border-radius: 1rem; }
-        #map-general, #map-detail, #map-about, #map-fullpage { filter: grayscale(1) contrast(1.1); }
-        #map-about { border-radius: 2rem; filter: invert(0.95) hue-rotate(180deg) brightness(0.95) saturate(0.8) contrast(1.2); }
+        #map-general, #map-detail, #map-fullpage { filter: grayscale(1) contrast(1.1); }
+        #map-about {
+            border-radius: 2rem;
+            overflow: hidden;
+            background: #0f131b;
+        }
+        
+        /* Hide scrollbar for carousel but keep functionality */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        /* Standard tabs */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        
+        /* Welcome panel background */
         .welcome-bg { 
             background: linear-gradient(rgba(253, 253, 251, 0.95), rgba(253, 253, 251, 0.8)), 
                         url('https://upload.wikimedia.org/wikipedia/commons/e/ea/Plano_de_la_Ciudad_de_Buenos_Aires_-_1900.jpg') center/cover;
             background-blend-mode: grayscale;
         }
+        
+        /* Muestra panel background (matches welcome-bg structure but in an elegant, sober light violet/aubergine tone) */
+        .muestra-bg { 
+            background: linear-gradient(rgba(249, 246, 252, 0.96), rgba(244, 239, 248, 0.94)), 
+                        url('https://upload.wikimedia.org/wikipedia/commons/e/ea/Plano_de_la_Ciudad_de_Buenos_Aires_-_1900.jpg') center/cover;
+            background-blend-mode: multiply;
+        }
+        
         .retro-overlay {
             position: fixed;
             inset: 0;
@@ -30,94 +65,263 @@
             opacity: 0.15;
             z-index: 1000;
         }
+        
+        /* 2D Spatial Grid Navigation Style */
+        #spatial-grid {
+            position: fixed;
+            inset: 0;
+            width: 200vw;
+            height: 200vh;
+            display: grid;
+            grid-template-columns: 100vw 100vw;
+            grid-template-rows: 100vh 100vh;
+            transition: transform 1000ms cubic-bezier(0.76, 0, 0.24, 1), opacity 500ms ease, transform-origin 500ms ease;
+            z-index: 10;
+            opacity: 1;
+            background-color: #fdfdfb;
+            will-change: transform;
+        }
+
+        #spatial-grid.inactive {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.98);
+            z-index: 0;
+        }
+        .grid-screen {
+            display: block !important;
+            width: 100vw;
+            height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+            scrollbar-width: thin;
+        }
     </style>
 </head>
 <body class="bg-white text-black">
     <div class="retro-overlay"></div>
  
-    <!-- PANTALLA DE BIENVENIDA -->
-    <section id="inicio" class="tab-content active min-h-screen py-12 flex flex-col items-center justify-center text-center welcome-bg px-6 relative">
-        <div class="space-y-4 mb-8 pt-10">
-            <h1 id="main-title" class="text-[clamp(4rem,20vw,12rem)] font-bold tracking-tighter leading-[0.8] text-black flex justify-center select-none">
-                <span class="letter group relative" data-letter="M" style="--img: url('https://picsum.photos/seed/m-arch/400/600?grayscale')">M</span>
-                <span class="letter group relative" data-letter="I" style="--img: url('https://picsum.photos/seed/i-arch/400/600?grayscale')">I</span>
-                <span class="letter group relative" data-letter="R" style="--img: url('https://picsum.photos/seed/r-arch/400/600?grayscale')">R</span>
-                <span class="letter group relative" data-letter="A" style="--img: url('https://picsum.photos/seed/a-arch/400/600?grayscale')">A</span>
-                <span class="letter group relative" data-letter="D" style="--img: url('https://picsum.photos/seed/d-arch/400/600?grayscale')">D</span>
-                <span class="letter group relative" data-letter="A" style="--img: url('https://picsum.photos/seed/a2-arch/400/600?grayscale')">A</span>
-                <span class="letter group relative" data-letter="S" style="--img: url('https://picsum.photos/seed/s-arch/400/600?grayscale')">S</span>
-            </h1>
+    <!-- SPATIAL GRID WRAPPER FOR 2D ANIMATIONS (INICIO, INFORMACION, MUESTRA) -->
+    <div id="spatial-grid" class="fixed inset-0 w-[200vw] h-[200vh] grid grid-cols-2 grid-rows-2 transition-transform duration-[1000ms] ease-[cubic-bezier(0.76,0,0.24,1)] z-10 bg-[#fdfdfb]">
+        
+        <!-- COLUMN 1, ROW 1: INICIO -->
+        <section id="inicio" class="tab-content active grid-screen py-12 flex flex-col items-center justify-center text-center welcome-bg px-6 relative">
+            <div class="space-y-4 mb-8 pt-10 relative z-10">
+                <h1 id="main-title" class="text-[clamp(4rem,20vw,12rem)] font-bold tracking-tighter leading-[0.8] text-black flex justify-center select-none">
+                    <span class="letter group relative" data-letter="M" style="--img: url('https://picsum.photos/seed/m-arch/400/600?grayscale')">M</span>
+                    <span class="letter group relative" data-letter="I" style="--img: url('https://picsum.photos/seed/i-arch/400/600?grayscale')">I</span>
+                    <span class="letter group relative" data-letter="R" style="--img: url('https://picsum.photos/seed/r-arch/400/600?grayscale')">R</span>
+                    <span class="letter group relative" data-letter="A" style="--img: url('https://picsum.photos/seed/a-arch/400/600?grayscale')">A</span>
+                    <span class="letter group relative" data-letter="D" style="--img: url('https://picsum.photos/seed/d-arch/400/600?grayscale')">D</span>
+                    <span class="letter group relative" data-letter="A" style="--img: url('https://picsum.photos/seed/a2-arch/400/600?grayscale')">A</span>
+                    <span class="letter group relative" data-letter="S" style="--img: url('https://picsum.photos/seed/s-arch/400/600?grayscale')">S</span>
+                </h1>
 
-            <style>
-                .letter {
-                    position: relative;
-                    color: #000;
-                    transition: color 0.3s;
-                }
-                .letter::before {
-                    content: attr(data-letter);
-                    position: absolute;
-                    inset: 0;
-                    color: transparent;
-                    background-image: var(--img);
-                    background-size: cover;
-                    background-position: center;
-                    -webkit-background-clip: text;
-                    background-clip: text;
-                    opacity: 0;
-                    transition: opacity 0.5s;
-                    pointer-events: none;
-                    /* Mask that follows the mouse via CSS variables */
-                    -webkit-mask-image: radial-gradient(circle 120px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%);
-                    mask-image: radial-gradient(circle 120px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%);
-                }
-                .letter:hover {
-                    color: rgba(0,0,0,0.1);
-                }
-                .letter:hover::before {
-                    opacity: 1;
-                }
-            </style>
+                <style>
+                    .letter {
+                        position: relative;
+                        color: #000;
+                        transition: color 0.3s;
+                    }
+                    .letter::before {
+                        content: attr(data-letter);
+                        position: absolute;
+                        inset: 0;
+                        color: transparent;
+                        background-image: var(--img);
+                        background-size: cover;
+                        background-position: center;
+                        -webkit-background-clip: text;
+                        background-clip: text;
+                        opacity: 0;
+                        transition: opacity 0.5s;
+                        pointer-events: none;
+                        /* Mask that follows the mouse via CSS variables */
+                        -webkit-mask-image: radial-gradient(circle 120px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%);
+                        mask-image: radial-gradient(circle 120px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%);
+                    }
+                    .letter:hover {
+                        color: rgba(0,0,0,0.1);
+                    }
+                    .letter:hover::before {
+                        opacity: 1;
+                    }
+                </style>
 
-            <script>
-                document.getElementById('main-title').addEventListener('mousemove', (e) => {
-                    const letters = e.currentTarget.querySelectorAll('.letter');
-                    letters.forEach(letter => {
-                        const rect = letter.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const y = e.clientY - rect.top;
-                        letter.style.setProperty('--mouse-x', `${x}px`);
-                        letter.style.setProperty('--mouse-y', `${y}px`);
+                <script>
+                    document.getElementById('main-title').addEventListener('mousemove', (e) => {
+                        const letters = e.currentTarget.querySelectorAll('.letter');
+                        letters.forEach(letter => {
+                            const rect = letter.getBoundingClientRect();
+                            const x = e.clientX - rect.left;
+                            const y = e.clientY - rect.top;
+                            letter.style.setProperty('--mouse-x', `${x}px`);
+                            letter.style.setProperty('--mouse-y', `${y}px`);
+                        });
                     });
-                });
-            </script>
-            <div class="max-w-2xl mx-auto pt-10 pb-6 text-center">
-                <span id="home-pre-titulo" class="text-[10px] md:text-[11px] font-sans uppercase tracking-[0.5em] font-semibold text-black/40 block mb-6">Proyecto Miradas</span>
-                
-                <!-- Main quote in Playfair Display with exquisite italic styling -->
-                <blockquote id="home-cita" class="text-[26px] md:text-[34px] font-display italic font-medium text-black/90 leading-snug tracking-tight max-w-2xl mx-auto mb-6 px-4">
-                    “El patrimonio arquitectónico porteño convierte a Buenos Aires en un museo vivo y a cielo abierto.”
-                </blockquote>
-                
-                <!-- Supporting description with comfortable reading constraints -->
-                <p id="home-descripcion" class="text-[14px] md:text-[15px] font-sans text-black/50 leading-relaxed max-w-lg mx-auto font-normal">
-                    El proyecto <span class="font-medium text-black/80">Miradas</span> está destinado a que los alumnos de quinto año de la orientación de <span class="font-medium text-black/80">Producción en Medios</span> registren fotográficamente una serie de edificios relevantes por su valor arquitectónico, histórico y por las curiosidades que los rodean.
-                </p>
+                </script>
+                <div class="max-w-[75vw] sm:max-w-xl md:max-w-2xl mx-auto pt-4 md:pt-10 pb-6 text-center px-4">
+                    <span id="home-pre-titulo" class="text-[10px] md:text-[11px] font-sans uppercase tracking-[0.5em] font-semibold text-black/40 block mb-4 md:mb-6">Proyecto Miradas</span>
+                    
+                    <!-- Main quote in Playfair Display with exquisite italic styling -->
+                    <blockquote id="home-cita" class="text-[20px] sm:text-[24px] md:text-[34px] font-display italic font-medium text-black/90 leading-snug tracking-tight max-w-2xl mx-auto mb-4 md:mb-6 px-2 md:px-4">
+                        “El patrimonio arquitectónico porteño convierte a Buenos Aires en un museo vivo y a cielo abierto.”
+                    </blockquote>
+                    
+                    <!-- Supporting description with comfortable reading constraints -->
+                    <p id="home-descripcion" class="text-[13px] md:text-[15px] font-sans text-black/50 leading-relaxed max-w-lg mx-auto font-normal px-2">
+                        El proyecto <span class="font-medium text-black/80">Miradas</span> está destinado a que los alumnos de quinto año de la orientación de <span class="font-medium text-black/80">Producción en Medios de Comunicación</span> registren fotográficamente una serie de edificios relevantes por su valor arquitectónico, histórico y por las curiosidades que los rodean.
+                    </p>
+                    
+                </div>
             </div>
-        </div>
-        <div id="years-container" class="flex flex-col gap-10 items-center justify-center relative z-10 pt-10">
-            <!-- Populado dinámicamente por app.js desde Google Sheets -->
-        </div>
+            <div id="years-container" class="flex flex-col gap-10 items-center justify-center relative z-10 pt-4 md:pt-10 pb-16">
+                <!-- Populado dinámicamente por app.js desde Google Sheets -->
+            </div>
+ 
+            <!-- Arrow pointing RIGHT: Sobre el Proyecto -->
+            <div class="absolute right-2 sm:right-6 md:right-8 lg:right-10 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-4 group">
+                <div class="w-px h-12 md:h-16 lg:h-20 bg-black/10 group-hover:h-24 lg:group-hover:h-32 group-hover:bg-black/30 transition-all duration-700"></div>
+                <button onclick="showTab('informacion')" class="font-sans text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-black/40 hover:text-black transition-all cursor-pointer bg-transparent border-none py-3 [writing-mode:vertical-lr] select-none flex items-center gap-2 outline-none">
+                    <span>Sobre el Proyecto</span>
+                    <span class="inline-block [writing-mode:horizontal-tb] font-light mt-2 text-lg transform group-hover:translate-x-1 duration-300">&rarr;</span>
+                </button>
+                <div class="w-px h-12 md:h-16 lg:h-20 bg-black/10 group-hover:h-24 lg:group-hover:h-32 group-hover:bg-black/30 transition-all duration-700"></div>
+            </div>
 
-        <!-- Elegant 'Sobre el Proyecto' link on the lateral right side -->
-        <div class="absolute right-3 sm:right-6 md:right-8 lg:right-10 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-4 group">
-            <div class="w-px h-10 md:h-16 bg-black/10 group-hover:h-20 lg:group-hover:h-24 group-hover:bg-black/30 transition-all duration-700"></div>
-            <button onclick="showTab('informacion')" class="font-sans text-[9px] md:text-[10px] font-bold uppercase tracking-[0.5em] text-black/40 hover:text-black transition-all cursor-pointer bg-transparent border-none py-3 [writing-mode:vertical-lr] select-none">
-                Sobre el Proyecto
-            </button>
-            <div class="w-px h-10 md:h-16 bg-black/10 group-hover:h-20 lg:group-hover:h-24 group-hover:bg-black/30 transition-all duration-700"></div>
-        </div>
-    </section>
+
+        </section>
+ 
+        <!-- COLUMN 2, ROW 1: INFORMACION (Sobre el Proyecto - Dark) -->
+        <section id="informacion" class="tab-content grid-screen bg-black text-white relative py-12 md:py-20 lg:py-24 px-6 md:px-16 lg:px-24">
+            <!-- Arrow pointing LEFT: Volver -->
+            <div class="absolute left-2 sm:left-6 md:left-8 lg:left-10 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-4 group animate-fade-in">
+                <div class="w-px h-12 md:h-20 bg-white/10 group-hover:h-24 lg:group-hover:h-32 group-hover:bg-white/30 transition-all duration-700"></div>
+                <button onclick="showTab('inicio')" class="font-sans text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-white/40 hover:text-white transition-all cursor-pointer bg-transparent border-none py-3 [writing-mode:vertical-lr] select-none flex items-center gap-2 outline-none">
+                    <span class="inline-block [writing-mode:horizontal-tb] font-light mb-2 text-lg transform group-hover:-translate-x-1 duration-300">&larr;</span>
+                    <span>Volver al Inicio</span>
+                </button>
+                <div class="w-px h-12 md:h-20 bg-white/10 group-hover:h-24 lg:group-hover:h-32 group-hover:bg-white/30 transition-all duration-700"></div>
+            </div>
+ 
+            <div class="max-w-6xl mx-auto space-y-12 md:space-y-16 pl-10 xs:pl-16 md:pl-20 pb-16">
+                <!-- Header de la sección (We leave only the beautiful outer sidebar navigation back button) -->
+                <div class="flex justify-between items-center border-b border-white/10 pb-6">
+                    <span class="font-sans text-xs font-bold uppercase tracking-[0.4em] text-white/40">Miradas — Información</span>
+                </div>
+
+                <!-- Contenido Conceptual -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
+                    <div class="lg:col-span-5 space-y-8">
+                        <h2 class="font-sans font-bold text-4xl md:text-5xl lg:text-6xl uppercase tracking-tighter text-white leading-none">
+                            <span id="info-titulo">El Registro</span> <br><span id="info-titulo-destacado" class="text-white/45">como Legado</span>
+                        </h2>
+                        <p id="info-descripcion" class="font-sans text-sm md:text-base leading-relaxed text-white/60 font-light">
+                            La deconstrucción y conservación visual del patrimonio de Buenos Aires a través del objetivo de los estudiantes. Una perspectiva metodológica que documenta la evolución urbana, el contraste estilístico y las narrativas ocultas en las fachadas porteñas.
+                        </p>
+                        <div class="space-y-4 pt-4 border-t border-white/10">
+                            <div class="flex justify-between text-xs font-sans">
+                                <span class="opacity-40 uppercase tracking-widest">Institución</span>
+                                <span id="info-institucion" class="font-medium text-white/85">Colegio de Comunicación</span>
+                            </div>
+                            <div class="flex justify-between text-xs font-sans">
+                                <span class="opacity-40 uppercase tracking-widest">Orientación</span>
+                                <span id="info-orientacion" class="font-medium text-white/85">Producción en Medios</span>
+                            </div>
+                            <div class="flex justify-between text-xs font-sans">
+                                <span class="opacity-40 uppercase tracking-widest">Cátedra</span>
+                                <span id="info-catedra" class="font-medium text-white/85">Artes Visuales & Registro</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-7 space-y-6">
+                        <blockquote id="info-cita" class="text-2xl md:text-3xl lg:text-4xl font-display italic font-light text-white/95 leading-snug">
+                            “Recorrer las calles registrando el detalle, la luz y la sombra, es redescubrir la identidad colectiva que habita en los muros de nuestra ciudad.”
+                        </blockquote>
+                        <p id="info-texto-secundario" class="font-sans text-xs md:text-sm text-white/40 leading-relaxed font-light">
+                            Este espacio funciona como un archivo cartográfico interactivo, vinculando georreferencia, investigación documental e interpretación artística. Cada punto marcado representa un nodo de memoria colectiva, analizado críticamente por las nuevas miradas de nuestra comunidad educativa.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Mapa del Proyecto sin texto explícito de cartografía invertida en el divisor -->
+                <div class="space-y-6 pt-6">
+                    <div class="h-px bg-white/10"></div>
+                    <!-- Mapa del Proyecto (Interactivo) -->
+                    <div id="map-about" class="h-[450px] md:h-[550px] w-full bg-white"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COLUMN 1, ROW 2: MUESTRA (Muestra Física en la Escuela - Violet) -->
+        <section id="muestra" class="tab-content grid-screen muestra-bg text-[#2d1b40]/90 relative pt-4 pb-12 md:pt-6 md:pb-16 lg:pt-8 lg:pb-20 px-6 md:px-16 lg:px-24">
+
+            <div class="max-w-6xl mx-auto space-y-4 md:space-y-6 pl-2 xs:pl-6 md:pl-0 pb-8 relative z-10">
+                <!-- Arrow pointing UP: Volver (Elegant, in-flow, aligned horizontally with beautiful lines) -->
+                <div class="flex items-center justify-center gap-4 group animate-fade-in select-none w-full max-w-sm mx-auto">
+                    <div class="h-px w-8 sm:w-12 md:w-16 bg-[#2d1b40]/10 group-hover:w-16 sm:group-hover:w-24 md:group-hover:w-36 group-hover:bg-[#2d1b40]/35 transition-all duration-700 shrink-0"></div>
+                    <button onclick="showTab('inicio')" class="font-sans text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-[#2d1b40]/40 hover:text-[#2d1b40]/80 transition-all cursor-pointer bg-transparent border-none py-1 flex items-center gap-3 outline-none select-none shrink-0">
+                        <span class="text-xl font-light transform group-hover:-translate-y-1.5 transition-all duration-300">&uarr;</span>
+                        <span>Volver al Inicio</span>
+                    </button>
+                    <div class="h-px w-8 sm:w-12 md:w-16 bg-[#2d1b40]/10 group-hover:w-16 sm:group-hover:w-24 md:group-hover:w-36 group-hover:bg-[#2d1b40]/35 transition-all duration-700 shrink-0"></div>
+                </div>
+
+                <!-- SECTION HEADER (Aesthetic matched to 'Sobre el Proyecto' in white/accent format) -->
+                <div class="flex justify-between items-center border-b border-[#2d1b40]/10 pb-4">
+                    <span class="font-sans text-xs font-bold uppercase tracking-[0.4em] text-[#2d1b40]/40">Miradas — Muestra Física</span>
+                </div>
+
+                <!-- Central Editorial Structure with rich violet-accented video player -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
+                    <div class="lg:col-span-12 text-center max-w-3xl mx-auto space-y-6">
+                        <span class="text-[10px] md:text-[11px] font-sans uppercase tracking-[0.5em] font-semibold text-[#6d4d8c]/70 block mt-2">Exposición Escolar</span>
+                        
+                        <!-- Title (Using serif Cormorant Garamond / body serif default and Playfair display for beautiful editorial contrast) -->
+                        <h2 class="font-bold text-[clamp(2.5rem,7vw,5.5rem)] tracking-tighter leading-[0.95] text-[#2d1b40] block select-none my-4">
+                            <span id="muestra-titulo">Exposición</span> <br>
+                            <span id="muestra-subtitulo" class="text-[#6d4d8c] italic font-medium font-display capitalize block mt-1">en la Escuela</span>
+                        </h2>
+
+                        <!-- Epigraph Quote (Matches home-cita Playfair display italic) -->
+                        <blockquote id="muestra-cita" class="text-[20px] sm:text-[24px] md:text-[34px] font-display italic font-medium text-[#2d1b40] leading-snug tracking-tight max-w-2xl mx-auto my-3">
+                            “Próximamente”
+                        </blockquote>
+
+                        <!-- Paragraph (Matches home-descripcion layout) -->
+                        <p id="muestra-descripcion" class="text-[13px] md:text-[15px] font-sans text-[#2d1b40]/60 leading-relaxed max-w-lg mx-auto font-normal px-2 pb-4">
+                            Espacio destinado al registro de la muestra física en la escuela.
+                        </p>
+
+                        <!-- GALLERY CAROUSEL CONTAINER -->
+                        <div class="relative w-full max-w-4xl mx-auto mt-8 pb-10 group/carousel">
+                            
+                            <div id="muestra-gallery" class="flex flex-row overflow-x-auto snap-x snap-mandatory hide-scrollbar scroll-smooth w-full items-start">
+                                <!-- Slides injected here -->
+                            </div>
+                            
+                            <!-- Internal Carousel Arrows (Injected dynamically or made visible here) -->
+                            <button id="muestra-prev" onclick="scrollCarousel('muestra-gallery', -1)" class="absolute left-0 top-[40%] -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white/90 border border-[#2d1b40]/10 shadow-sm text-[#2d1b40]/60 hover:text-[#2d1b40] hover:bg-white transition-all hidden md:flex opacity-0 group-hover/carousel:opacity-100 -ml-4 pointer-events-none group-hover/carousel:pointer-events-auto">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                            </button>
+                            <button id="muestra-next" onclick="scrollCarousel('muestra-gallery', 1)" class="absolute right-0 top-[40%] -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white/90 border border-[#2d1b40]/10 shadow-sm text-[#2d1b40]/60 hover:text-[#2d1b40] hover:bg-white transition-all hidden md:flex opacity-0 group-hover/carousel:opacity-100 -mr-4 pointer-events-none group-hover/carousel:pointer-events-auto">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                            </button>
+
+                            <!-- Navigation indicators -->
+                            <div id="muestra-carousel-nav" class="hidden absolute bottom-0 left-0 right-0 flex justify-center gap-2 items-center">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COLUMN 2, ROW 2: EMPTY FILLER SLOT -->
+        <div class="grid-screen w-full h-full bg-[#120521]/15"></div>
+    </div>
 
     <!-- VISTA PÚBLICA (MAPA PRINCIPAL) -->
     <section id="hitos" class="tab-content min-h-screen">
@@ -200,63 +404,7 @@
         </main>
     </section>
 
-    <!-- SECCIÓN INSTITUCIONAL / SOBRE EL PROYECTO (DARK) -->
-    <section id="informacion" class="tab-content min-h-screen bg-black text-white relative py-12 md:py-20 lg:py-24 px-6 md:px-16 lg:px-24">
-        <div class="max-w-6xl mx-auto space-y-16">
-            <!-- Header de la sección -->
-            <div class="flex justify-between items-center border-b border-white/10 pb-6">
-                <span class="font-sans text-xs font-bold uppercase tracking-[0.4em] text-white/40">Miradas — Información</span>
-                <button onclick="showTab('inicio')" class="text-white/40 hover:text-white transition-all flex items-center gap-3 group cursor-pointer bg-transparent border-none p-0 outline-none">
-                    <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 12H5M12 19l-7-7 7-7"></path>
-                    </svg>
-                    <span class="font-sans text-[11px] font-bold uppercase tracking-[0.3em] text-white/50 group-hover:text-white transition-all">Volver</span>
-                </button>
-            </div>
 
-            <!-- Contenido Conceptual -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
-                <div class="lg:col-span-5 space-y-8">
-                    <h2 class="font-sans font-bold text-4xl md:text-5xl lg:text-6xl uppercase tracking-tighter text-white leading-none">
-                        <span id="info-titulo">El Registro</span> <br><span id="info-titulo-destacado" class="text-white/45">como Legado</span>
-                    </h2>
-                    <p id="info-descripcion" class="font-sans text-sm md:text-base leading-relaxed text-white/60 font-light">
-                        La deconstrucción y conservación visual del patrimonio de Buenos Aires a través del objetivo de los estudiantes. Una perspectiva metodológica que documenta la evolución urbana, el contraste estilístico y las narrativas ocultas en las fachadas porteñas.
-                    </p>
-                    <div class="space-y-4 pt-4 border-t border-white/10">
-                        <div class="flex justify-between text-xs font-sans">
-                            <span class="opacity-40 uppercase tracking-widest">Institución</span>
-                            <span id="info-institucion" class="font-medium text-white/85">Colegio de Comunicación</span>
-                        </div>
-                        <div class="flex justify-between text-xs font-sans">
-                            <span class="opacity-40 uppercase tracking-widest">Orientación</span>
-                            <span id="info-orientacion" class="font-medium text-white/85">Producción en Medios</span>
-                        </div>
-                        <div class="flex justify-between text-xs font-sans">
-                            <span class="opacity-40 uppercase tracking-widest">Cátedra</span>
-                            <span id="info-catedra" class="font-medium text-white/85">Artes Visuales & Registro</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="lg:col-span-7 space-y-6">
-                    <blockquote id="info-cita" class="text-2xl md:text-3xl lg:text-4xl font-display italic font-light text-white/95 leading-snug">
-                        “Recorrer las calles registrando el detalle, la luz y la sombra, es redescubrir la identidad colectiva que habita en los muros de nuestra ciudad.”
-                    </blockquote>
-                    <p id="info-texto-secundario" class="font-sans text-xs md:text-sm text-white/40 leading-relaxed font-light">
-                        Este espacio funciona como un archivo cartográfico interactivo, vinculando georreferencia, investigación documental e interpretación artística. Cada punto marcado representa un nodo de memoria colectiva, analizado críticamente por las nuevas miradas de nuestra comunidad educativa.
-                    </p>
-                </div>
-            </div>
-
-            <!-- Mapa del Proyecto sin texto explícito de cartografía invertida en el divisor -->
-            <div class="space-y-6 pt-6">
-                <div class="h-px bg-white/10"></div>
-                <!-- Mapa container dark -->
-                <div id="map-about" class="h-[450px] md:h-[550px] w-full border border-white/10 bg-[#0d0d0d]"></div>
-            </div>
-        </div>
-    </section>
 
     <!-- DETAIL PANEL OVERLAY -->
     <div id="detail-panel" class="hidden fixed inset-0 w-full h-full bg-white overflow-y-auto transition-all duration-500 ease-out transform scale-95 opacity-0 z-[1000] scroll-smooth">
