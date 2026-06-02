@@ -29,6 +29,88 @@
             overflow: hidden;
             background: #0f131b;
         }
+
+        /* Mobile Animations (Replace hover effects on touch devices) */
+        @media (max-width: 768px) {
+            .mobile-animate-line-v { animation: pulseLineV 6s infinite ease-in-out; }
+            .mobile-animate-line-v-white { animation: pulseLineVWhite 6s infinite ease-in-out; }
+            .mobile-animate-line-h { animation: pulseLineH 6s infinite ease-in-out; }
+            .mobile-animate-line-h-purple { animation: pulseLineHPurple 6s infinite ease-in-out; }
+            .mobile-animate-arrow-r { animation: arrowRight 6s infinite ease-in-out; }
+            .mobile-animate-arrow-l { animation: arrowLeft 6s infinite ease-in-out; }
+            .mobile-animate-arrow-u { animation: arrowUp 6s infinite ease-in-out; }
+            .mobile-animate-arrow-d { animation: arrowDown 6s infinite ease-in-out; }
+            .mobile-animate-card-img { animation: cardImg 8s infinite alternate ease-in-out; }
+            .mobile-animate-card-corners { animation: cardCorners 4s infinite alternate ease-in-out; }
+            .mobile-animate-card-text { animation: cardText 4s infinite alternate ease-in-out; }
+            
+            .mobile-animate-letter { animation: letterMobileColor 3s forwards ease-in-out; }
+            .mobile-animate-letter::before {
+                animation: letterMobileBefore 3s forwards ease-in-out;
+                animation-delay: inherit;
+            }
+            .mobile-animate-highlight { animation: highlightMobile 3s forwards ease-in-out; }
+            
+            @keyframes pulseLineV {
+                0%, 100% { background-color: rgba(0,0,0,0.1); }
+                50% { background-color: rgba(0,0,0,0.4); }
+            }
+            @keyframes pulseLineVWhite {
+                0%, 100% { background-color: rgba(255,255,255,0.1); }
+                50% { background-color: rgba(255,255,255,0.4); }
+            }
+            @keyframes pulseLineH {
+                0%, 100% { background-color: rgba(0,0,0,0.1); }
+                50% { background-color: rgba(0,0,0,0.4); }
+            }
+            @keyframes pulseLineHPurple {
+                0%, 100% { background-color: rgba(45,27,64,0.1); }
+                50% { background-color: rgba(45,27,64,0.4); }
+            }
+            @keyframes arrowRight {
+                0%, 100% { transform: translateX(0); }
+                50% { transform: translateX(4px); }
+            }
+            @keyframes arrowLeft {
+                0%, 100% { transform: translateX(0); }
+                50% { transform: translateX(-4px); }
+            }
+            @keyframes arrowUp {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-3px); }
+            }
+            @keyframes arrowDown {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(3px); }
+            }
+            @keyframes cardImg {
+                0% { transform: scale(1.3); opacity: 0.3; }
+                100% { transform: scale(1.33); opacity: 0.45; }
+            }
+            @keyframes cardCorners {
+                0% { border-color: rgba(0,0,0,0.15); }
+                100% { border-color: rgba(0,0,0,0.4); }
+            }
+            @keyframes cardText {
+                0% { color: rgba(0,0,0,0.3); }
+                100% { color: rgba(0,0,0,0.6); }
+            }
+            @keyframes letterMobileColor {
+                0%, 30% { color: #000; }
+                50%, 80% { color: rgba(0,0,0,0.1); }
+                100% { color: #000; }
+            }
+            @keyframes letterMobileBefore {
+                0%, 30% { opacity: 0; mask-image: none; -webkit-mask-image: none; }
+                50%, 80% { opacity: 1; mask-image: none; -webkit-mask-image: none; }
+                100% { opacity: 0; }
+            }
+            @keyframes highlightMobile {
+                0%, 30% { color: rgba(0,0,0,0.9); text-shadow: none; }
+                50%, 80% { color: rgba(0,0,0,0.4); text-shadow: 0 0 8px rgba(0,0,0,0.2); }
+                100% { color: rgba(0,0,0,0.9); text-shadow: none; }
+            }
+        }
         
         /* Hide scrollbar for carousel but keep functionality */
         .hide-scrollbar::-webkit-scrollbar {
@@ -108,14 +190,14 @@
         <!-- COLUMN 1, ROW 1: INICIO -->
         <section id="inicio" class="tab-content active grid-screen py-12 flex flex-col items-center justify-center text-center welcome-bg px-6 relative">
             <div class="space-y-4 mb-8 pt-10 relative z-10">
-                <h1 id="main-title" class="text-[clamp(4rem,20vw,12rem)] font-bold tracking-tighter leading-[0.8] text-black flex justify-center select-none">
-                    <span class="letter group relative" data-letter="M" style="--img: url('https://picsum.photos/seed/m-arch/400/600?grayscale')">M</span>
-                    <span class="letter group relative" data-letter="I" style="--img: url('https://picsum.photos/seed/i-arch/400/600?grayscale')">I</span>
-                    <span class="letter group relative" data-letter="R" style="--img: url('https://picsum.photos/seed/r-arch/400/600?grayscale')">R</span>
-                    <span class="letter group relative" data-letter="A" style="--img: url('https://picsum.photos/seed/a-arch/400/600?grayscale')">A</span>
-                    <span class="letter group relative" data-letter="D" style="--img: url('https://picsum.photos/seed/d-arch/400/600?grayscale')">D</span>
-                    <span class="letter group relative" data-letter="A" style="--img: url('https://picsum.photos/seed/a2-arch/400/600?grayscale')">A</span>
-                    <span class="letter group relative" data-letter="S" style="--img: url('https://picsum.photos/seed/s-arch/400/600?grayscale')">S</span>
+                <h1 id="main-title" class="text-[clamp(3.5rem,14vw,9rem)] font-bold tracking-tighter leading-[0.8] text-black flex justify-center select-none">
+                    <span class="letter group relative mobile-animate-letter" data-letter="M" style="--img: url('https://picsum.photos/seed/m-arch/400/600?grayscale'); animation-delay: 0s;">M</span>
+                    <span class="letter group relative mobile-animate-letter" data-letter="I" style="--img: url('https://picsum.photos/seed/i-arch/400/600?grayscale'); animation-delay: 0.2s;">I</span>
+                    <span class="letter group relative mobile-animate-letter" data-letter="R" style="--img: url('https://picsum.photos/seed/r-arch/400/600?grayscale'); animation-delay: 0.4s;">R</span>
+                    <span class="letter group relative mobile-animate-letter" data-letter="A" style="--img: url('https://picsum.photos/seed/a-arch/400/600?grayscale'); animation-delay: 0.6s;">A</span>
+                    <span class="letter group relative mobile-animate-letter" data-letter="D" style="--img: url('https://picsum.photos/seed/d-arch/400/600?grayscale'); animation-delay: 0.8s;">D</span>
+                    <span class="letter group relative mobile-animate-letter" data-letter="A" style="--img: url('https://picsum.photos/seed/a2-arch/400/600?grayscale'); animation-delay: 1.0s;">A</span>
+                    <span class="letter group relative mobile-animate-letter" data-letter="S" style="--img: url('https://picsum.photos/seed/s-arch/400/600?grayscale'); animation-delay: 1.2s;">S</span>
                 </h1>
 
                 <style>
@@ -141,32 +223,68 @@
                         -webkit-mask-image: radial-gradient(circle 120px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%);
                         mask-image: radial-gradient(circle 120px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%);
                     }
-                    .letter:hover {
-                        color: rgba(0,0,0,0.1);
+                    .letter:hover, .letter.force-hover {
+                        color: rgba(0,0,0,0.1) !important;
                     }
-                    .letter:hover::before {
-                        opacity: 1;
+                    .letter:hover::before, .letter.force-hover::before {
+                        opacity: 1 !important;
                     }
                 </style>
 
                 <script>
-                    document.getElementById('main-title').addEventListener('mousemove', (e) => {
-                        const letters = e.currentTarget.querySelectorAll('.letter');
+                    const mainTitle = document.getElementById('main-title');
+                    const letters = mainTitle.querySelectorAll('.letter');
+
+                    const updateMousePos = (x, y, isTouch = false) => {
                         letters.forEach(letter => {
                             const rect = letter.getBoundingClientRect();
-                            const x = e.clientX - rect.left;
-                            const y = e.clientY - rect.top;
-                            letter.style.setProperty('--mouse-x', `${x}px`);
-                            letter.style.setProperty('--mouse-y', `${y}px`);
+                            const lx = x - rect.left;
+                            const ly = y - rect.top;
+                            letter.style.setProperty('--mouse-x', `${lx}px`);
+                            letter.style.setProperty('--mouse-y', `${ly}px`);
+
+                            if (isTouch) {
+                                if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                                    letter.classList.add('force-hover');
+                                } else {
+                                    letter.classList.remove('force-hover');
+                                }
+                            }
                         });
+                    };
+
+                    mainTitle.addEventListener('mousemove', (e) => {
+                        updateMousePos(e.clientX, e.clientY, false);
                     });
+
+                    mainTitle.addEventListener('touchstart', (e) => {
+                        const touch = e.touches[0];
+                        if (touch) updateMousePos(touch.clientX, touch.clientY, true);
+                    }, { passive: true });
+
+                    mainTitle.addEventListener('touchmove', (e) => {
+                        const touch = e.touches[0];
+                        if (touch) updateMousePos(touch.clientX, touch.clientY, true);
+                    }, { passive: true });
+
+                    document.addEventListener('touchstart', (e) => {
+                        if (!mainTitle.contains(e.target)) {
+                            letters.forEach(l => l.classList.remove('force-hover'));
+                        }
+                    }, { passive: true });
+
+                    // Remove animation class after 4s so it doesn't interfere
+                    setTimeout(() => {
+                        letters.forEach(l => l.classList.remove('mobile-animate-letter'));
+                        document.querySelectorAll('.mobile-animate-highlight').forEach(el => el.classList.remove('mobile-animate-highlight'));
+                    }, 4000);
                 </script>
                 <div class="max-w-[75vw] sm:max-w-xl md:max-w-2xl mx-auto pt-4 md:pt-10 pb-6 text-center px-4">
                     <span id="home-pre-titulo" class="text-[10px] md:text-[11px] font-sans uppercase tracking-[0.5em] font-semibold text-black/40 block mb-4 md:mb-6">Proyecto Miradas</span>
                     
                     <!-- Main quote in Playfair Display with exquisite italic styling -->
                     <blockquote id="home-cita" class="text-[20px] sm:text-[24px] md:text-[34px] font-display italic font-medium text-black/90 leading-snug tracking-tight max-w-2xl mx-auto mb-4 md:mb-6 px-2 md:px-4">
-                        “El patrimonio arquitectónico porteño convierte a Buenos Aires en un museo vivo y a cielo abierto.”
+                        “El <span class="mobile-animate-highlight">patrimonio arquitectónico</span> porteño convierte a Buenos Aires en un museo vivo y a cielo abierto.”
                     </blockquote>
                     
                     <!-- Supporting description with comfortable reading constraints -->
@@ -181,13 +299,13 @@
             </div>
  
             <!-- Arrow pointing RIGHT: Sobre el Proyecto -->
-            <div class="absolute right-2 sm:right-6 md:right-8 lg:right-10 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-4 group">
-                <div class="w-px h-12 md:h-16 lg:h-20 bg-black/10 group-hover:h-24 lg:group-hover:h-32 group-hover:bg-black/30 transition-all duration-700"></div>
-                <button onclick="showTab('informacion')" class="font-sans text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-black/40 hover:text-black transition-all cursor-pointer bg-transparent border-none py-3 [writing-mode:vertical-lr] select-none flex items-center gap-2 outline-none">
+            <div class="absolute right-3 sm:right-6 md:right-8 lg:right-10 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-2 sm:gap-4 group">
+                <div class="w-px h-6 sm:h-12 md:h-16 lg:h-20 bg-black/10 group-hover:h-24 lg:group-hover:h-32 group-hover:bg-black/30 transition-all duration-700 mobile-animate-line-v"></div>
+                <button onclick="showTab('informacion')" class="font-sans text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-black/40 hover:text-black transition-all cursor-pointer bg-transparent border-none py-2 sm:py-3 [writing-mode:vertical-lr] select-none flex items-center gap-2 outline-none">
                     <span>Sobre el Proyecto</span>
-                    <span class="inline-block [writing-mode:horizontal-tb] font-light mt-2 text-lg transform group-hover:translate-x-1 duration-300">&rarr;</span>
+                    <span class="inline-block [writing-mode:horizontal-tb] font-light mt-2 text-lg transform group-hover:translate-x-1 duration-300 mobile-animate-arrow-r">&rarr;</span>
                 </button>
-                <div class="w-px h-12 md:h-16 lg:h-20 bg-black/10 group-hover:h-24 lg:group-hover:h-32 group-hover:bg-black/30 transition-all duration-700"></div>
+                <div class="w-px h-6 sm:h-12 md:h-16 lg:h-20 bg-black/10 group-hover:h-24 lg:group-hover:h-32 group-hover:bg-black/30 transition-all duration-700 mobile-animate-line-v"></div>
             </div>
 
 
@@ -196,13 +314,13 @@
         <!-- COLUMN 2, ROW 1: INFORMACION (Sobre el Proyecto - Dark) -->
         <section id="informacion" class="tab-content grid-screen bg-black text-white relative py-12 md:py-20 lg:py-24 px-6 md:px-16 lg:px-24">
             <!-- Arrow pointing LEFT: Volver -->
-            <div class="absolute left-2 sm:left-6 md:left-8 lg:left-10 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-4 group animate-fade-in">
-                <div class="w-px h-12 md:h-20 bg-white/10 group-hover:h-24 lg:group-hover:h-32 group-hover:bg-white/30 transition-all duration-700"></div>
-                <button onclick="showTab('inicio')" class="font-sans text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-white/40 hover:text-white transition-all cursor-pointer bg-transparent border-none py-3 [writing-mode:vertical-lr] select-none flex items-center gap-2 outline-none">
-                    <span class="inline-block [writing-mode:horizontal-tb] font-light mb-2 text-lg transform group-hover:-translate-x-1 duration-300">&larr;</span>
+            <div class="absolute left-3 sm:left-6 md:left-8 lg:left-10 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-2 sm:gap-4 group animate-fade-in">
+                <div class="w-px h-6 sm:h-12 md:h-20 bg-white/10 group-hover:h-24 lg:group-hover:h-32 group-hover:bg-white/30 transition-all duration-700 mobile-animate-line-v-white"></div>
+                <button onclick="showTab('inicio')" class="font-sans text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-white/40 hover:text-white transition-all cursor-pointer bg-transparent border-none py-2 sm:py-3 [writing-mode:vertical-lr] select-none flex items-center gap-2 outline-none">
+                    <span class="inline-block [writing-mode:horizontal-tb] font-light mb-2 text-lg transform group-hover:-translate-x-1 duration-300 mobile-animate-arrow-l">&larr;</span>
                     <span>Volver al Inicio</span>
                 </button>
-                <div class="w-px h-12 md:h-20 bg-white/10 group-hover:h-24 lg:group-hover:h-32 group-hover:bg-white/30 transition-all duration-700"></div>
+                <div class="w-px h-6 sm:h-12 md:h-20 bg-white/10 group-hover:h-24 lg:group-hover:h-32 group-hover:bg-white/30 transition-all duration-700 mobile-animate-line-v-white"></div>
             </div>
  
             <div class="max-w-6xl mx-auto space-y-12 md:space-y-16 pl-10 xs:pl-16 md:pl-20 pb-16">
@@ -221,17 +339,17 @@
                             La deconstrucción y conservación visual del patrimonio de Buenos Aires a través del objetivo de los estudiantes. Una perspectiva metodológica que documenta la evolución urbana, el contraste estilístico y las narrativas ocultas en las fachadas porteñas.
                         </p>
                         <div class="space-y-4 pt-4 border-t border-white/10">
-                            <div class="flex justify-between text-xs font-sans">
-                                <span class="opacity-40 uppercase tracking-widest">Institución</span>
-                                <span id="info-institucion" class="font-medium text-white/85">Colegio de Comunicación</span>
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-4 text-xs font-sans">
+                                <span class="opacity-40 uppercase tracking-widest text-left">Institución</span>
+                                <span id="info-institucion" class="font-medium text-white/85 sm:text-right">Colegio de Comunicación</span>
                             </div>
-                            <div class="flex justify-between text-xs font-sans">
-                                <span class="opacity-40 uppercase tracking-widest">Orientación</span>
-                                <span id="info-orientacion" class="font-medium text-white/85">Producción en Medios</span>
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-4 text-xs font-sans">
+                                <span class="opacity-40 uppercase tracking-widest text-left">Orientación</span>
+                                <span id="info-orientacion" class="font-medium text-white/85 sm:text-right">Producción en Medios</span>
                             </div>
-                            <div class="flex justify-between text-xs font-sans">
-                                <span class="opacity-40 uppercase tracking-widest">Cátedra</span>
-                                <span id="info-catedra" class="font-medium text-white/85">Artes Visuales & Registro</span>
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-4 text-xs font-sans">
+                                <span class="opacity-40 uppercase tracking-widest text-left">Cátedra</span>
+                                <span id="info-catedra" class="font-medium text-white/85 sm:text-right">Artes Visuales & Registro</span>
                             </div>
                         </div>
                     </div>
@@ -261,12 +379,12 @@
             <div class="max-w-6xl mx-auto space-y-4 md:space-y-6 pl-2 xs:pl-6 md:pl-0 pb-8 relative z-10">
                 <!-- Arrow pointing UP: Volver (Elegant, in-flow, aligned horizontally with beautiful lines) -->
                 <div class="flex items-center justify-center gap-4 group animate-fade-in select-none w-full max-w-sm mx-auto">
-                    <div class="h-px w-8 sm:w-12 md:w-16 bg-[#2d1b40]/10 group-hover:w-16 sm:group-hover:w-24 md:group-hover:w-36 group-hover:bg-[#2d1b40]/35 transition-all duration-700 shrink-0"></div>
+                    <div class="h-px w-8 sm:w-12 md:w-16 bg-[#2d1b40]/10 group-hover:w-16 sm:group-hover:w-24 md:group-hover:w-36 group-hover:bg-[#2d1b40]/35 transition-all duration-700 shrink-0 mobile-animate-line-h-purple"></div>
                     <button onclick="showTab('inicio')" class="font-sans text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-[#2d1b40]/40 hover:text-[#2d1b40]/80 transition-all cursor-pointer bg-transparent border-none py-1 flex items-center gap-3 outline-none select-none shrink-0">
-                        <span class="text-xl font-light transform group-hover:-translate-y-1.5 transition-all duration-300">&uarr;</span>
+                        <span class="text-xl font-light transform group-hover:-translate-y-1.5 transition-all duration-300 mobile-animate-arrow-u">&uarr;</span>
                         <span>Volver al Inicio</span>
                     </button>
-                    <div class="h-px w-8 sm:w-12 md:w-16 bg-[#2d1b40]/10 group-hover:w-16 sm:group-hover:w-24 md:group-hover:w-36 group-hover:bg-[#2d1b40]/35 transition-all duration-700 shrink-0"></div>
+                    <div class="h-px w-8 sm:w-12 md:w-16 bg-[#2d1b40]/10 group-hover:w-16 sm:group-hover:w-24 md:group-hover:w-36 group-hover:bg-[#2d1b40]/35 transition-all duration-700 shrink-0 mobile-animate-line-h-purple"></div>
                 </div>
 
                 <!-- SECTION HEADER (Aesthetic matched to 'Sobre el Proyecto' in white/accent format) -->
@@ -302,11 +420,11 @@
                                 <!-- Slides injected here -->
                             </div>
                             
-                            <!-- Internal Carousel Arrows (Injected dynamically or made visible here) -->
-                            <button id="muestra-prev" onclick="scrollCarousel('muestra-gallery', -1)" class="absolute left-0 top-[40%] -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white/90 border border-[#2d1b40]/10 shadow-sm text-[#2d1b40]/60 hover:text-[#2d1b40] hover:bg-white transition-all hidden md:flex opacity-0 group-hover/carousel:opacity-100 -ml-4 pointer-events-none group-hover/carousel:pointer-events-auto">
+                            <!-- Internal Carousel Arrows -->
+                            <button id="muestra-prev" onclick="scrollCarousel('muestra-gallery', -1)" class="absolute left-2 md:-left-6 top-[40%] md:top-[45%] -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white border border-[#2d1b40]/10 shadow-md text-[#2d1b40]/60 hover:text-[#2d1b40] hover:scale-105 transition-all opacity-90 hover:opacity-100" style="display: none;">
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
                             </button>
-                            <button id="muestra-next" onclick="scrollCarousel('muestra-gallery', 1)" class="absolute right-0 top-[40%] -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white/90 border border-[#2d1b40]/10 shadow-sm text-[#2d1b40]/60 hover:text-[#2d1b40] hover:bg-white transition-all hidden md:flex opacity-0 group-hover/carousel:opacity-100 -mr-4 pointer-events-none group-hover/carousel:pointer-events-auto">
+                            <button id="muestra-next" onclick="scrollCarousel('muestra-gallery', 1)" class="absolute right-2 md:-right-6 top-[40%] md:top-[45%] -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white border border-[#2d1b40]/10 shadow-md text-[#2d1b40]/60 hover:text-[#2d1b40] hover:scale-105 transition-all opacity-90 hover:opacity-100" style="display: none;">
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
                             </button>
 
@@ -380,22 +498,24 @@
 
     <!-- SECCIÓN MAPA FULLSCREEN (PATRIMONIOS EN EL MAPA) -->
     <section id="mapa" class="tab-content min-h-screen bg-white relative">
-        <header class="h-[64px] px-6 lg:px-10 border-b border-gray-100 flex justify-between items-center fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md z-[100]">
+        <header class="h-[56px] sm:h-[64px] px-3 sm:px-6 lg:px-10 border-b border-gray-100 flex justify-between items-center fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md z-[100]">
             <!-- Unified Volver Button -->
-            <button onclick="showTab('inicio')" class="text-gray-400 hover:text-black transition-all flex items-center gap-3 group cursor-pointer bg-transparent border-none p-0 outline-none">
-                <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <button onclick="showTab('inicio')" class="text-gray-400 hover:text-black transition-all flex items-center gap-1 sm:gap-2 md:gap-3 group cursor-pointer bg-transparent border-none p-0 outline-none shrink-0 z-10 flex-1">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:-translate-x-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 12H5M12 19l-7-7 7-7"></path>
                 </svg>
-                <span class="font-sans text-[11px] font-bold uppercase tracking-[0.3em] text-black/50 group-hover:text-black transition-all">Volver</span>
+                <span class="font-sans text-[7.5px] xs:text-[9px] sm:text-[11px] font-bold uppercase tracking-widest sm:tracking-[0.3em] text-black/50 group-hover:text-black transition-all whitespace-nowrap">Volver</span>
             </button>
             
             <!-- Elegant Title matching the copywriting and style -->
-            <span class="font-sans text-[10px] md:text-[11px] font-bold uppercase tracking-[0.5em] text-black/50 text-center select-none absolute left-1/2 -translate-x-1/2 whitespace-nowrap">
+            <span class="font-sans text-[7px] xs:text-[8px] sm:text-[9px] md:text-[11px] font-bold uppercase tracking-widest sm:tracking-[0.2em] md:tracking-[0.4em] text-black/50 text-center select-none uppercase truncate px-1 shrink">
                 Patrimonios en el mapa
             </span>
             
             <!-- Right side branding matching the main view -->
-            <button onclick="showTab('inicio')" class="text-2xl font-bold tracking-tighter cursor-pointer hover:text-black/40 transition-colors duration-300 shrink-0 select-none outline-none">MIRADAS</button>
+            <div class="flex-1 text-right">
+                <button onclick="showTab('inicio')" class="text-sm xs:text-base sm:text-xl md:text-2xl font-bold tracking-tighter cursor-pointer hover:text-black/40 transition-colors duration-300 shrink-0 select-none outline-none z-10">MIRADAS</button>
+            </div>
         </header>
         
         <!-- Fullscreen Map Container -->

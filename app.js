@@ -169,25 +169,28 @@ async function renderYears(collections) {
         const src = getDriveDirectLink(c.imagen, 'w1200');
         const isActive = c.estado === 'activo';
         return `
-            <button ${isActive ? `onclick="showTab('hitos', ${year})"` : ''} class="group relative flex flex-col items-center p-12 md:p-16 max-w-3xl overflow-hidden rounded-2xl ${isActive ? 'cursor-pointer' : 'opacity-20 grayscale cursor-default pointer-events-none'}">
+            <button ${isActive ? `onclick="showTab('hitos', ${year})"` : ''} class="group relative flex flex-col items-center p-8 md:p-12 lg:p-16 max-w-3xl overflow-hidden rounded-2xl ${isActive ? 'cursor-pointer active:scale-95' : 'opacity-20 grayscale cursor-default pointer-events-none'} transition-transform duration-300">
                 <!-- Project Image Reveal -->
-                <div class="absolute inset-2 opacity-[0.24] md:opacity-[0.28] group-hover:opacity-[0.65] transition-all duration-1000 pointer-events-none overflow-hidden grayscale">
+                <div class="absolute inset-2 opacity-50 md:opacity-[0.24] group-hover:opacity-[0.65] transition-all duration-1000 pointer-events-none overflow-hidden grayscale md:grayscale-0">
                     <img src="${src}"
-                         class="w-full h-full object-cover scale-150 group-hover:scale-110 transition-transform duration-[8000ms] ease-out"
-                         alt="${c.titulo || 'Proyecto Miradas'}">
+                         srcset="${getDriveDirectLink(c.imagen, 'w400')} 400w, ${getDriveDirectLink(c.imagen, 'w800')} 800w, ${getDriveDirectLink(c.imagen, 'w1200')} 1200w"
+                         sizes="(max-width: 768px) 100vw, 1200px"
+                         class="w-full h-full object-cover scale-[1.3] group-hover:scale-110 transition-transform duration-[8000ms] ease-out mobile-animate-card-img"
+                         alt="${c.titulo || 'Proyecto Miradas'}"
+                         loading="lazy">
                 </div>
 
                 <!-- Framing corners -->
-                <div class="absolute top-0 left-0 w-8 h-8 border-t border-l border-black/10 group-hover:border-black/40 transition-all duration-500 z-10"></div>
-                <div class="absolute top-0 right-0 w-8 h-8 border-t border-r border-black/10 group-hover:border-black/40 transition-all duration-500 z-10"></div>
-                <div class="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-black/10 group-hover:border-black/40 transition-all duration-500 z-10"></div>
-                <div class="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-black/10 group-hover:border-black/40 transition-all duration-500 z-10"></div>
+                <div class="absolute top-0 left-0 w-6 h-6 md:w-8 md:h-8 border-t border-l border-black/15 group-hover:border-black/40 transition-all duration-500 z-10 mobile-animate-card-corners"></div>
+                <div class="absolute top-0 right-0 w-6 h-6 md:w-8 md:h-8 border-t border-r border-black/15 group-hover:border-black/40 transition-all duration-500 z-10 mobile-animate-card-corners"></div>
+                <div class="absolute bottom-0 left-0 w-6 h-6 md:w-8 md:h-8 border-b border-l border-black/15 group-hover:border-black/40 transition-all duration-500 z-10 mobile-animate-card-corners"></div>
+                <div class="absolute bottom-0 right-0 w-6 h-6 md:w-8 md:h-8 border-b border-r border-black/15 group-hover:border-black/40 transition-all duration-500 z-10 mobile-animate-card-corners"></div>
 
-                <div class="relative flex flex-col items-center gap-4 z-10 text-center">
-                    <span class="font-sans text-[11px] md:text-xs font-bold uppercase tracking-[0.5em] text-black/30 group-hover:text-black/60 transition-all duration-500">
+                <div class="relative flex flex-col items-center gap-3 md:gap-4 z-10 text-center">
+                    <span class="font-sans text-[10px] md:text-xs font-bold uppercase tracking-[0.5em] text-black/50 md:text-black/30 group-hover:text-black/60 transition-all duration-500 mobile-animate-card-text">
                         Colección Activa — ${year}
                     </span>
-                    <h2 class="font-sans font-bold text-3xl md:text-5xl lg:text-6xl uppercase tracking-tighter text-black leading-tight max-w-3xl px-6">
+                    <h2 class="font-sans font-bold text-2xl sm:text-3xl md:text-5xl lg:text-6xl uppercase tracking-tighter text-black leading-tight max-w-3xl px-4 md:px-6">
                         ${c.titulo || 'Proyecto Miradas'}
                     </h2>
                 </div>
@@ -196,7 +199,7 @@ async function renderYears(collections) {
     }).join('') + `
         <!-- Elegant 'Muestra en la escuela — Próximamente' indicator (Muestra indicator with horizontal lines in the sides and prominent arrow) -->
         <div class="group flex items-center justify-center gap-4 sm:gap-6 md:gap-8 mt-16 mb-12 select-none text-center mx-auto w-full max-w-sm px-4">
-            <div class="h-px w-8 sm:w-12 md:w-16 bg-black/10 group-hover:w-16 sm:group-hover:w-24 md:group-hover:w-36 group-hover:bg-black/35 transition-all duration-700 shrink-0"></div>
+            <div class="h-px w-8 sm:w-12 md:w-16 bg-black/10 group-hover:w-16 sm:group-hover:w-24 md:group-hover:w-36 group-hover:bg-black/35 transition-all duration-700 shrink-0 mobile-animate-line-h"></div>
             <button onclick="showTab('muestra')" class="font-sans py-4 flex flex-col items-center gap-2 cursor-pointer bg-transparent border-none outline-none select-none transition-all duration-700 shrink-0">
                 <span class="text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-black/30 group-hover:text-black/50 transition-colors duration-500">Muestra física</span>
                 <h3 class="text-xs md:text-sm font-semibold uppercase tracking-[0.3em] text-black/40 group-hover:text-black transition-colors duration-500 my-1 pb-0.5">
@@ -207,10 +210,10 @@ async function renderYears(collections) {
                 </p>
                 <div class="mt-4 flex flex-col items-center gap-2 text-[9px] md:text-[11px] font-bold uppercase tracking-[0.4em] text-black/20 group-hover:text-black/85 transition-colors duration-500">
                     <span>Ver Muestra</span>
-                    <span class="text-xl md:text-2xl font-light transform group-hover:translate-y-2 transition-all duration-500 leading-none select-none">&darr;</span>
+                    <span class="text-xl md:text-2xl font-light transform group-hover:translate-y-2 transition-all duration-500 leading-none select-none mobile-animate-arrow-d">&darr;</span>
                 </div>
             </button>
-            <div class="h-px w-8 sm:w-12 md:w-16 bg-black/10 group-hover:w-16 sm:group-hover:w-24 md:group-hover:w-36 group-hover:bg-black/35 transition-all duration-700 shrink-0"></div>
+            <div class="h-px w-8 sm:w-12 md:w-16 bg-black/10 group-hover:w-16 sm:group-hover:w-24 md:group-hover:w-36 group-hover:bg-black/35 transition-all duration-700 shrink-0 mobile-animate-line-h"></div>
         </div>
     `;
 }
@@ -323,35 +326,12 @@ function renderMuestraFisica(data) {
 
     const container = document.getElementById('muestra-gallery');
     const navContainer = document.getElementById('muestra-carousel-nav');
+    const carouselWrapper = container ? container.closest('.group\\/carousel') : null;
+    
     if (!container) return; // Wait until DOM is available
 
     // Filter valid items correctly preventing whitespace-only empty rows
     const validItems = data.filter(item => Object.values(item).some(val => val && String(val).trim() !== ''));
-
-    // Reset container contents completely to avoid duplicate overlapping
-    container.innerHTML = '';
-    if (navContainer) {
-        navContainer.innerHTML = '';
-        if (validItems.length > 1) {
-            navContainer.classList.remove('hidden');
-        } else {
-            navContainer.classList.add('hidden');
-        }
-    }
-
-    if (validItems.length === 0) {
-        // Fallback for an empty spreadsheet or no physical sample details
-        container.innerHTML = `
-            <div class="w-full max-w-2xl shrink-0 snap-center flex flex-col items-center justify-center mx-auto aspect-video rounded-3xl border border-[#2d1b40]/10 bg-white/40 shadow-sm relative group/empty transition-all">
-                <div class="w-16 h-16 border border-[#2d1b40]/15 rounded-full flex items-center justify-center mx-auto mb-4 relative bg-[#fdfbfd]">
-                    <span class="text-2xl text-[#2d1b40]/40 font-light">⧖</span>
-                </div>
-                <span class="text-[10px] md:text-[11px] font-sans tracking-[0.4em] font-semibold uppercase text-[#2d1b40]/40">Próximamente</span>
-                <p class="font-sans text-xs md:text-sm text-[#2d1b40]/50 mt-3 max-w-[280px] md:max-w-sm text-center leading-relaxed">El registro audiovisual de la exposición estará disponible en este espacio.</p>
-            </div>
-        `;
-        return;
-    }
 
     const getKey = (item, possibleKeys) => {
         const keys = Object.keys(item);
@@ -362,7 +342,123 @@ function renderMuestraFisica(data) {
         return match ? item[match] : '';
     };
 
-    validItems.forEach((item, index) => {
+    let carouselItems = [];
+
+    // Parse logic that supports BOTH traditional "columns" format and clean "clave/valor" format
+    validItems.forEach(item => {
+        // Formato A: Tabular (tipo, titulo, descripcion, url)
+        // Formato B: Clave/Valor (campo, contenido)
+        const claveRaw = getKey(item, ['tipo', 'type', 'formato', 'categoria', 'campo', 'clave', 'propiedad', 'key']);
+        const tipoOCampo = String(claveRaw).toLowerCase().trim();
+        
+        let titulo = '';
+        let descripcion = '';
+        let url = '';
+        let isMedia = false;
+        
+        // Detección de formato "Clave - Valor" vs "Columnas extendidas"
+        const valorGeneral = getKey(item, ['valor', 'value', 'contenido', 'texto_principal']);
+        
+        if (valorGeneral && !item.url && !item.link) {
+            // Estamos en formato "Clave - Valor" vertical
+            if (tipoOCampo.includes('video') || tipoOCampo.includes('foto') || tipoOCampo.includes('img') || tipoOCampo.includes('imagen')) {
+                url = valorGeneral;
+                isMedia = true;
+            } else {
+                titulo = valorGeneral;
+                // Si hay un tercer campo para detalle/bajada
+                descripcion = getKey(item, ['descripcion', 'detalle', 'info', 'extra']);
+            }
+        } else {
+            // Formato de columnas normal
+            const tituloRaw = getKey(item, ['titulo', 'title', 'nombre', 'encabezado']);
+            titulo = (typeof tituloRaw === 'string') ? tituloRaw.trim() : '';
+            
+            const descripcionRaw = getKey(item, ['descripcion', 'texto', 'detalle', 'info', 'bajada']);
+            descripcion = (typeof descripcionRaw === 'string') ? descripcionRaw.trim() : '';
+            
+            const urlRaw = getKey(item, ['url', 'link', 'video', 'imagen', 'foto', 'enlace', 'archivo']);
+            url = (typeof urlRaw === 'string') ? urlRaw.trim() : '';
+        }
+
+        // Determinar qué hacer con esta fila
+        if (tipoOCampo === 'titulo' || tipoOCampo === 'encabezado' || tipoOCampo === 'title') {
+            if (titulo) {
+                const el = document.getElementById('muestra-titulo');
+                if (el) el.innerText = titulo;
+            }
+            if (descripcion) {
+                const el = document.getElementById('muestra-subtitulo');
+                if (el) el.innerText = descripcion;
+            }
+        } else if (tipoOCampo === 'cita' || tipoOCampo === 'frase' || tipoOCampo === 'quote') {
+            const content = descripcion || titulo;
+            if (content) {
+                const el = document.getElementById('muestra-cita');
+                if (el) el.innerHTML = `“${content}”`;
+            }
+        } else if (tipoOCampo === 'descripcion' || tipoOCampo === 'parrafo' || tipoOCampo === 'texto') {
+            const content = descripcion || titulo;
+            if (content) {
+                const el = document.getElementById('muestra-descripcion');
+                if (el) el.innerHTML = parseSimpleMinimarkdown(content);
+            }
+        } else {
+            // Assume it's a media/carousel item if it's explicitly video/foto or has a URL, 
+            // or if it doesn't match the structural types above but has content.
+            const itemUrl = url || getKey(item, ['url', 'link', 'enlace', 'archivo']);
+            if (itemUrl && (isMedia || tipoOCampo.includes('video') || tipoOCampo.includes('foto') || tipoOCampo.includes('img') || tipoOCampo.includes('imagen') || tipoOCampo.includes('galeria') || tipoOCampo)) {
+                // Ensure we pass a properly structured item to the carousel array
+                let mediaObj = { ...item };
+                if (isMedia) {
+                    mediaObj.url = url;
+                    mediaObj.tipo = tipoOCampo;
+                    mediaObj.titulo = getKey(item, ['titulo', 'detalle', 'extra']) || ''; // If they put an extra column for media titles
+                }
+                carouselItems.push(mediaObj);
+            }
+        }
+    });
+
+    // Reset container contents completely to avoid duplicate overlapping
+    container.innerHTML = '';
+    
+    if (navContainer) {
+        navContainer.innerHTML = '';
+        if (carouselItems.length > 1) {
+            navContainer.classList.remove('hidden');
+            if (carouselWrapper) {
+                carouselWrapper.querySelectorAll('button').forEach(b => b.style.display = 'flex');
+            }
+        } else {
+            navContainer.classList.add('hidden');
+            if (carouselWrapper) {
+                carouselWrapper.querySelectorAll('button').forEach(b => b.style.display = 'none');
+            }
+        }
+    }
+
+    if (carouselItems.length === 0) {
+        // Show an elegant fallback presentation when there is no media data
+        if (carouselWrapper) {
+            carouselWrapper.style.display = '';
+            carouselWrapper.querySelectorAll('button').forEach(b => b.style.display = 'none');
+        }
+        container.innerHTML = `
+            <div class="w-full shrink-0 snap-center flex flex-col items-center justify-center aspect-[16/9] md:aspect-[21/9] rounded-2xl md:rounded-3xl border border-[#2d1b40]/10 bg-white/50 shadow-sm relative transition-all">
+                <div class="w-14 h-14 md:w-16 md:h-16 border border-[#2d1b40]/10 rounded-full flex items-center justify-center mx-auto mb-4 bg-[#fdfbfd] shadow-sm">
+                    <span class="text-2xl text-[#2d1b40]/40 font-light">⧖</span>
+                </div>
+                <span class="text-[10px] md:text-[11px] font-sans tracking-[0.4em] font-semibold uppercase text-[#2d1b40]/50 relative z-10 text-center px-4">Próximamente</span>
+                <p class="font-sans text-xs md:text-sm text-[#2d1b40]/40 mt-3 max-w-[280px] md:max-w-md text-center leading-relaxed relative z-10 px-4">El registro final de la muestra en la escuela será cargado en este espacio.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    if (carouselWrapper) carouselWrapper.style.display = '';
+
+    carouselItems.forEach((item, index) => {
         const urlRaw = getKey(item, ['url', 'link', 'video', 'imagen', 'foto', 'enlace', 'archivo']);
         const url = (typeof urlRaw === 'string') ? urlRaw.trim() : '';
         const tipoRaw = getKey(item, ['tipo', 'type', 'formato']);
@@ -401,9 +497,11 @@ function renderMuestraFisica(data) {
                     </div>
                 `;
             } else if (finalType === 'foto') {
+                 const imgSrc = url.includes('drive.google.com') ? getDriveDirectLink(url, 'w800') : url;
+                 const srcsetAttr = url.includes('drive.google.com') ? `srcset="${getDriveDirectLink(url, 'w400')} 400w, ${getDriveDirectLink(url, 'w800')} 800w, ${getDriveDirectLink(url, 'w1200')} 1200w"` : '';
                  mediaHtml = `
                     <div class="aspect-[4/3] md:aspect-[3/2] lg:aspect-video w-full rounded-2xl overflow-hidden bg-[#2d1b40]/5 shadow-sm border border-[#2d1b40]/10 relative group bg-cover bg-center">
-                        <img src="${url.includes('drive.google.com') ? getDriveDirectLink(url, 'w1200') : url}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105" alt="${titulo || 'Registro Fotográfico de Exposición'}" loading="lazy" />
+                        <img src="${imgSrc}" ${srcsetAttr} sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 1000px" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105" alt="${titulo || 'Registro Fotográfico de Exposición'}" loading="lazy" />
                     </div>
                  `;
             } else {
@@ -418,11 +516,11 @@ function renderMuestraFisica(data) {
             }
         } else {
             mediaHtml = `
-                <div class="aspect-video w-full rounded-2xl overflow-hidden bg-white/40 shadow-sm border border-[#2d1b40]/10 flex flex-col items-center justify-center relative">
-                    <div class="w-12 h-12 rounded-full border border-[#2d1b40]/10 flex items-center justify-center mb-3">
-                        <span class="text-[#2d1b40]/20 text-xl font-light">⧖</span>
+                <div class="aspect-video w-full rounded-2xl overflow-hidden bg-white/50 shadow-sm border border-[#2d1b40]/10 flex flex-col items-center justify-center relative">
+                    <div class="w-12 h-12 rounded-full border border-[#2d1b40]/10 bg-[#fdfbfd] flex items-center justify-center mb-3">
+                        <span class="text-[#2d1b40]/30 text-xl font-light">⧖</span>
                     </div>
-                    <span class="text-[9px] md:text-[10px] font-sans tracking-[0.3em] font-semibold uppercase text-[#2d1b40]/40 text-center px-4">Próximamente</span>
+                    <span class="text-[9px] md:text-[10px] font-sans tracking-[0.3em] font-semibold uppercase text-[#2d1b40]/50 text-center px-4">Próximamente</span>
                 </div>
             `;
         }
@@ -445,7 +543,7 @@ function renderMuestraFisica(data) {
         container.appendChild(slideContainer);
 
         // Populate navigation pagination dots natively reacting to scroll 
-        if (validItems.length > 1 && navContainer) {
+        if (carouselItems.length > 1 && navContainer) {
             const dot = document.createElement('button');
             dot.className = `h-1.5 rounded-full transition-all duration-500 ${index === 0 ? 'bg-[#6d4d8c] w-6' : 'bg-[#2d1b40]/15 hover:bg-[#6d4d8c]/40 w-1.5'}`;
             dot.onclick = () => {
@@ -457,7 +555,7 @@ function renderMuestraFisica(data) {
     });
 
     // Scroll listener calculates center-most slide iteratively 
-    if (validItems.length > 1 && navContainer) {
+    if (carouselItems.length > 1 && navContainer) {
         container.addEventListener('scroll', () => {
              const centerContainer = container.scrollLeft + (container.clientWidth / 2);
              let activeIndex = 0;
@@ -1008,13 +1106,19 @@ async function showDetail(id, isFromMap = false, pushHistory = true) {
                         <div class="relative group/carousel-main overflow-hidden">
                             <div id="carousel-track" class="flex transition-transform duration-1000 cubic-bezier(0.16, 1, 0.3, 1)">
                                 ${fotos.map((f, i) => {
-                                    const src = getDriveDirectLink(typeof f === 'string' ? f : f.url);
+                                    const urlStr = typeof f === 'string' ? f : f.url;
+                                    const srcBase = getDriveDirectLink(urlStr, 'w800');
+                                    const src400 = getDriveDirectLink(urlStr, 'w400');
+                                    const src1200 = getDriveDirectLink(urlStr, 'w1200');
+                                    const hasUrl = urlStr && (urlStr.includes('drive.google.com') || urlStr.includes('id='));
+                                    const srcset = hasUrl ? `srcset="${src400} 400w, ${srcBase} 800w, ${src1200} 1200w"` : '';
                                     return `
                                     <div class="group min-w-full h-[50vh] lg:h-[70vh] flex items-center justify-center bg-gray-50/20 cursor-zoom-in relative" onclick="openFullscreen(${i})">
-                                        <img src="${src}"
+                                        <img src="${srcBase}"
+                                             ${srcset} sizes="(max-width: 1024px) 100vw, 80vw"
                                              class="max-w-full max-h-full object-contain select-none ${i === 0 ? '' : 'opacity-0'} transition-opacity duration-500"
                                              draggable="false"
-                                             ${i === 0 ? '' : 'loading="lazy"'}
+                                             ${i === 0 ? 'loading="eager"' : 'loading="lazy"'}
                                              onload="this.classList.remove('opacity-0')"
                                              onerror="this.src='https://picsum.photos/seed/broken/1200/800?grayscale'; this.onerror=null; this.onload=()=>this.classList.remove('opacity-0')">
                                         <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300">
@@ -1194,16 +1298,23 @@ function renderPublicGrid(data = null) {
     grid.classList.remove('grid-cols-1');
     grid.classList.add('md:grid-cols-2', 'xl:grid-cols-3');
 
-    grid.innerHTML = data.map(b => `
+    grid.innerHTML = data.map((b, idx) => {
+        const fallback = `https://picsum.photos/seed/${b.id}/600/400?grayscale`;
+        const baseSrc = getDriveDirectLink(b.imageUrl, 'w600') || fallback;
+        const hasUrl = b.imageUrl && (b.imageUrl.includes('drive.google.com') || b.imageUrl.includes('id='));
+        const srcset = hasUrl ? `srcset="${getDriveDirectLink(b.imageUrl, 'w400')} 400w, ${baseSrc} 600w, ${getDriveDirectLink(b.imageUrl, 'w800')} 800w"` : '';
+        const lazyAttr = idx < 4 ? 'loading="eager"' : 'loading="lazy"';
+        
+        return `
         <div onclick="showDetail('${b.id}')" class="group cursor-pointer bg-white p-4 md:p-6 hover:bg-gray-50/50 transition-all duration-300 overflow-hidden relative">
             <div class="space-y-4 h-full">
                 <div class="w-full aspect-video overflow-hidden rounded-xl md:rounded-2xl bg-gray-50 shrink-0">
-                    <img src="${getDriveDirectLink(b.imageUrl, 'w600') || `https://picsum.photos/seed/${b.id}/600/400?grayscale`}"
+                    <img src="${baseSrc}" ${srcset} sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
                          class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 grayscale opacity-0"
                          alt="${b.name}"
-                         loading="lazy"
+                         ${lazyAttr}
                          onload="this.classList.remove('opacity-0')"
-                         onerror="this.src='https://picsum.photos/seed/${b.id}/600/400?grayscale'; this.onerror=null; this.onload=()=>this.classList.remove('opacity-0')">
+                         onerror="this.src='${fallback}'; this.onerror=null; this.onload=()=>this.classList.remove('opacity-0')">
                 </div>
                 <div class="py-1 text-center flex-1 min-w-0">
                     <h3 class="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-black uppercase truncate w-full mb-1">${b.name}</h3>
@@ -1215,7 +1326,8 @@ function renderPublicGrid(data = null) {
             </div>
             <div class="absolute bottom-0 left-6 right-6 h-px bg-gray-50 lg:hidden"></div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // MAPAS
@@ -1416,10 +1528,16 @@ function openFullscreen(index, pushHistory = true) {
     }
     
         track.innerHTML = fotos.map(f => {
-            const src = getDriveDirectLink(typeof f === 'string' ? f : f.url);
+            const urlStr = typeof f === 'string' ? f : f.url;
+            const srcBase = getDriveDirectLink(urlStr, 'w1200');
+            const src800 = getDriveDirectLink(urlStr, 'w800');
+            const srcMax = getDriveDirectLink(urlStr, 'w2000');
+            const hasUrl = urlStr && (urlStr.includes('drive.google.com') || urlStr.includes('id='));
+            const srcset = hasUrl ? `srcset="${src800} 800w, ${srcBase} 1200w, ${srcMax} 2000w"` : '';
             return `
                 <div class="min-w-full h-full flex items-center justify-center bg-transparent">
-                    <img src="${src}"
+                    <img src="${srcBase}"
+                         ${srcset} sizes="100vw"
                          class="max-w-full max-h-full m-auto object-contain select-none shadow-[20px_20px_60px_rgba(0,0,0,0.6)] opacity-0 transition-opacity duration-500"
                          draggable="false"
                          loading="lazy"
@@ -1631,15 +1749,19 @@ loadData();
     const SWIPE_THRESHOLD = 70;
 
     document.addEventListener('touchstart', (e) => {
+        touchStartX = 0;
+        touchStartY = 0;
+
         const activeTab = document.querySelector('.tab-content.active')?.id;
         if (!['inicio', 'informacion', 'muestra'].includes(activeTab)) return;
         
-        // Prevent interference with maps, search elements, input forms, or overlays
+        // Prevent interference with maps, search elements, input forms, overlays or horizontally scrollable containers like carousels
         if (e.target.closest('#map-about') || 
             e.target.closest('.leaflet-container') || 
             e.target.closest('#search-input') || 
             e.target.closest('#detail-container') ||
             e.target.closest('button') ||
+            e.target.closest('.overflow-x-auto') ||
             e.target.closest('a')) {
             return;
         }
@@ -1649,6 +1771,8 @@ loadData();
     }, { passive: true });
 
     document.addEventListener('touchend', (e) => {
+        if (!touchStartX || !touchStartY) return;
+
         const activeTab = document.querySelector('.tab-content.active')?.id;
         if (!['inicio', 'informacion', 'muestra'].includes(activeTab)) return;
         
@@ -1657,6 +1781,7 @@ loadData();
             e.target.closest('#search-input') || 
             e.target.closest('#detail-container') ||
             e.target.closest('button') ||
+            e.target.closest('.overflow-x-auto') ||
             e.target.closest('a')) {
             return;
         }
@@ -1669,6 +1794,8 @@ loadData();
 
         // Discard very short taps or noise
         if (Math.abs(diffX) < SWIPE_THRESHOLD && Math.abs(diffY) < SWIPE_THRESHOLD) return;
+
+        const scrollContainer = document.getElementById(activeTab);
 
         // Determine main axis: Horizontal vs Vertical
         if (Math.abs(diffX) > Math.abs(diffY)) {
@@ -1684,9 +1811,17 @@ loadData();
             // Vertical navigation (Y-axis)
             if (activeTab === 'inicio' && diffY < -SWIPE_THRESHOLD) {
                 // Swipe up -> Pan down to Muestra
+                if (scrollContainer) {
+                    const atBottom = scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 10;
+                    if (!atBottom) return;
+                }
                 showTab('muestra');
             } else if (activeTab === 'muestra' && diffY > SWIPE_THRESHOLD) {
                 // Swipe down -> Pan up to Inicio
+                if (scrollContainer) {
+                    const atTop = scrollContainer.scrollTop <= 10;
+                    if (!atTop) return;
+                }
                 showTab('inicio');
             }
         }
