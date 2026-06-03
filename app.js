@@ -445,7 +445,13 @@ function renderMuestraFisica(data) {
             carouselWrapper.querySelectorAll('button').forEach(b => b.style.display = 'none');
         }
         container.innerHTML = `
-            <div class="w-full shrink-0 snap-center flex flex-col items-center justify-center aspect-[16/9] md:aspect-[21/9] rounded-2xl md:rounded-3xl border border-[#2d1b40]/10 bg-white/50 shadow-sm relative transition-all">
+            <div class="w-full shrink-0 snap-center flex flex-col items-center justify-center aspect-[16/9] md:aspect-[21/9] bg-white/50 relative transition-all">
+                <!-- Framing corners -->
+                <div class="absolute top-0 left-0 w-6 h-6 md:w-8 md:h-8 border-t border-l border-black/15 z-10"></div>
+                <div class="absolute top-0 right-0 w-6 h-6 md:w-8 md:h-8 border-t border-r border-black/15 z-10"></div>
+                <div class="absolute bottom-0 left-0 w-6 h-6 md:w-8 md:h-8 border-b border-l border-black/15 z-10"></div>
+                <div class="absolute bottom-0 right-0 w-6 h-6 md:w-8 md:h-8 border-b border-r border-black/15 z-10"></div>
+                
                 <div class="w-14 h-14 md:w-16 md:h-16 border border-[#2d1b40]/10 rounded-full flex items-center justify-center mx-auto mb-4 bg-[#fdfbfd] shadow-sm">
                     <span class="text-2xl text-[#2d1b40]/40 font-light">⧖</span>
                 </div>

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proyecto Miradas 2026</title>
-    <link rel="preload" href="https://upload.wikimedia.org/wikipedia/commons/e/ea/Plano_de_la_Ciudad_de_Buenos_Aires_-_1900.jpg" as="image">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -127,16 +126,12 @@
         
         /* Welcome panel background */
         .welcome-bg { 
-            background: linear-gradient(rgba(253, 253, 251, 0.95), rgba(253, 253, 251, 0.8)), 
-                        url('https://upload.wikimedia.org/wikipedia/commons/e/ea/Plano_de_la_Ciudad_de_Buenos_Aires_-_1900.jpg') center/cover;
-            background-blend-mode: grayscale;
+            background: linear-gradient(to bottom, rgba(253, 253, 251, 1), rgba(253, 253, 251, 0.95)); 
         }
         
         /* Muestra panel background (matches welcome-bg structure but in an elegant, sober light violet/aubergine tone) */
         .muestra-bg { 
-            background: linear-gradient(rgba(249, 246, 252, 0.96), rgba(244, 239, 248, 0.94)), 
-                        url('https://upload.wikimedia.org/wikipedia/commons/e/ea/Plano_de_la_Ciudad_de_Buenos_Aires_-_1900.jpg') center/cover;
-            background-blend-mode: multiply;
+            background: linear-gradient(to bottom, rgba(249, 246, 252, 1), rgba(244, 239, 248, 1)); 
         }
         
         .retro-overlay {
@@ -394,17 +389,22 @@
 
                 <!-- Central Editorial Structure with rich violet-accented video player -->
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
-                    <div class="lg:col-span-12 text-center max-w-3xl mx-auto space-y-6">
+                    <div class="lg:col-span-12 text-center max-w-3xl mx-auto space-y-3 md:space-y-4">
                         <span class="text-[10px] md:text-[11px] font-sans uppercase tracking-[0.5em] font-semibold text-[#6d4d8c]/70 block mt-2">Exposición Escolar</span>
                         
                         <!-- Title (Using serif Cormorant Garamond / body serif default and Playfair display for beautiful editorial contrast) -->
-                        <h2 class="font-bold text-[clamp(2.5rem,7vw,5.5rem)] tracking-tighter leading-[0.95] text-[#2d1b40] block select-none my-4">
+                        <h2 class="font-bold text-[clamp(2.5rem,7vw,5.5rem)] tracking-tighter leading-[0.95] text-[#2d1b40] block select-none mb-1">
                             <span id="muestra-titulo">Exposición</span> <br>
                             <span id="muestra-subtitulo" class="text-[#6d4d8c] italic font-medium font-display capitalize block mt-1">en la Escuela</span>
                         </h2>
 
+                        <!-- M Medios Logo -->
+                        <div class="mx-auto w-44 h-44 md:w-64 md:h-64 flex items-center justify-center overflow-hidden -my-4 md:-my-6">
+                            <img src="/m-medios.png" class="object-contain w-full h-full scale-[1.35]" alt="M Medios" />
+                        </div>
+
                         <!-- Epigraph Quote (Matches home-cita Playfair display italic) -->
-                        <blockquote id="muestra-cita" class="text-[20px] sm:text-[24px] md:text-[34px] font-display italic font-medium text-[#2d1b40] leading-snug tracking-tight max-w-2xl mx-auto my-3">
+                        <blockquote id="muestra-cita" class="text-[20px] sm:text-[24px] md:text-[34px] font-display italic font-medium text-[#2d1b40] leading-snug tracking-tight max-w-2xl mx-auto mt-0 mb-1">
                             “Próximamente”
                         </blockquote>
 
