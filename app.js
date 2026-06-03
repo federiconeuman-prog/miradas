@@ -1848,6 +1848,8 @@ if (_clave) {
             const d = await r.json();
             if (d.ok) {
                 _btn.textContent = '✓ Listo';
+                window.userBuildingPhotos = {};
+                window.lastEntregaMap = {};
                 await loadData();
             } else {
                 _btn.textContent = 'Clave incorrecta';
