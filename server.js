@@ -329,6 +329,16 @@ app.post('/api/refresh', async (req, res) => {
   }
 });
 
+// Estado del servidor (para keep-alive y monitoreo)
+app.get('/health', (req, res) => {
+  res.json({
+    ok: true,
+    uptime: Math.floor(process.uptime()),
+    cacheLoaded: cache !== null,
+    loadedAt: cache?.loadedAt ?? null,
+  });
+});
+
 // Wildcard fallback to serve index.html for clean client routes
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api/') || req.path.includes('.')) {
