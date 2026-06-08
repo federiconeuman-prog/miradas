@@ -8,11 +8,11 @@ async function loadData() {
     try {
         const res = await fetch('/api/buildings');
         buildings = await res.json();
-
+        
         // Cargar metadatos de colecciones (años)
         const colRes = await fetch('/api/collections');
         const collections = await colRes.json();
-
+        
         await renderYears(collections);
         updateHomeTexts(collections);
         renderCollection();
@@ -87,7 +87,7 @@ function renderLandingPhotos(photos) {
     photos.forEach((p, idx) => {
         const letraKey = Object.keys(p).find(k => k.toLowerCase() === 'letra' || k.toLowerCase() === 'letra_id');
         const urlKey = Object.keys(p).find(k => k.toLowerCase() === 'url' || k.toLowerCase() === 'link' || k.toLowerCase() === 'imagen' || k.toLowerCase() === 'image');
-
+        
         if (letraKey && urlKey && p[letraKey] && p[urlKey]) {
             const val = String(p[letraKey]).toUpperCase().trim();
             letterMap[val] = p[urlKey];
@@ -227,15 +227,15 @@ function parseSimpleMinimarkdown(text) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
-
+    
     // Convertir **negrita** o __negrita__ en span estilizado para coincidir con la estética
     safeText = safeText.replace(/\*\*(.*?)\*\*/g, '<span class="font-semibold text-black/90">$1</span>');
     safeText = safeText.replace(/__(.*?)__/g, '<span class="font-semibold text-black/90">$1</span>');
-
+    
     // Convertir *cursiva* o _cursiva_ en cursiva
     safeText = safeText.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
     safeText = safeText.replace(/_(.*?)_/g, '<em class="italic">$1</em>');
-
+    
     // Reemplazar saltos de línea por <br>
     safeText = safeText.replace(/\n/g, '<br>');
     return safeText;
@@ -243,10 +243,10 @@ function parseSimpleMinimarkdown(text) {
 
 function updateHomeTexts(collections) {
     if (!collections) return;
-
+    
     const years = Object.keys(collections);
     if (years.length === 0) return;
-
+    
     const activeYear = years.find(year => collections[year].estado === 'activo') || years[0];
     const act = collections[activeYear];
     if (!act) return;
@@ -254,7 +254,7 @@ function updateHomeTexts(collections) {
     // Buscar propiedades de manera flexible y tolerante a tildes/mayúsculas
     const findValue = (obj, searchWords) => {
         const keys = Object.keys(obj);
-
+        
         // 1. Coincidencia exacta (normalizada) primero
         const exactMatch = keys.find(k => {
             const normKey = k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
@@ -264,7 +264,7 @@ function updateHomeTexts(collections) {
             });
         });
         if (exactMatch) return obj[exactMatch];
-
+        
         // 2. Coincidencia parcial con resguardo
         const partialMatch = keys.find(k => {
             const normKey = k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
@@ -302,7 +302,7 @@ function parseSimpleMinimarkdownDark(text) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
-
+    
     safeText = safeText.replace(/\*\*(.*?)\*\*/g, '<span class="font-semibold text-white/90">$1</span>');
     safeText = safeText.replace(/__(.*?)__/g, '<span class="font-semibold text-white/90">$1</span>');
     safeText = safeText.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
@@ -327,7 +327,7 @@ function renderMuestraFisica(data) {
     const container = document.getElementById('muestra-gallery');
     const navContainer = document.getElementById('muestra-carousel-nav');
     const carouselWrapper = container ? container.closest('.group\\/carousel') : null;
-
+    
     if (!container) return; // Wait until DOM is available
 
     // Filter valid items correctly preventing whitespace-only empty rows
@@ -350,15 +350,15 @@ function renderMuestraFisica(data) {
         // Formato B: Clave/Valor (campo, contenido)
         const claveRaw = getKey(item, ['tipo', 'type', 'formato', 'categoria', 'campo', 'clave', 'propiedad', 'key']);
         const tipoOCampo = String(claveRaw).toLowerCase().trim();
-
+        
         let titulo = '';
         let descripcion = '';
         let url = '';
         let isMedia = false;
-
+        
         // Detección de formato "Clave - Valor" vs "Columnas extendidas"
         const valorGeneral = getKey(item, ['valor', 'value', 'contenido', 'texto_principal']);
-
+        
         if (valorGeneral && !item.url && !item.link) {
             // Estamos en formato "Clave - Valor" vertical
             if (tipoOCampo.includes('video') || tipoOCampo.includes('foto') || tipoOCampo.includes('img') || tipoOCampo.includes('imagen')) {
@@ -373,10 +373,10 @@ function renderMuestraFisica(data) {
             // Formato de columnas normal
             const tituloRaw = getKey(item, ['titulo', 'title', 'nombre', 'encabezado']);
             titulo = (typeof tituloRaw === 'string') ? tituloRaw.trim() : '';
-
+            
             const descripcionRaw = getKey(item, ['descripcion', 'texto', 'detalle', 'info', 'bajada']);
             descripcion = (typeof descripcionRaw === 'string') ? descripcionRaw.trim() : '';
-
+            
             const urlRaw = getKey(item, ['url', 'link', 'video', 'imagen', 'foto', 'enlace', 'archivo']);
             url = (typeof urlRaw === 'string') ? urlRaw.trim() : '';
         }
@@ -404,7 +404,7 @@ function renderMuestraFisica(data) {
                 if (el) el.innerHTML = parseSimpleMinimarkdown(content);
             }
         } else {
-            // Assume it's a media/carousel item if it's explicitly video/foto or has a URL,
+            // Assume it's a media/carousel item if it's explicitly video/foto or has a URL, 
             // or if it doesn't match the structural types above but has content.
             const itemUrl = url || getKey(item, ['url', 'link', 'enlace', 'archivo']);
             if (itemUrl && (isMedia || tipoOCampo.includes('video') || tipoOCampo.includes('foto') || tipoOCampo.includes('img') || tipoOCampo.includes('imagen') || tipoOCampo.includes('galeria') || tipoOCampo)) {
@@ -422,7 +422,7 @@ function renderMuestraFisica(data) {
 
     // Reset container contents completely to avoid duplicate overlapping
     container.innerHTML = '';
-
+    
     if (navContainer) {
         navContainer.innerHTML = '';
         if (carouselItems.length > 1) {
@@ -451,7 +451,7 @@ function renderMuestraFisica(data) {
                 <div class="absolute top-0 right-0 w-6 h-6 md:w-8 md:h-8 border-t border-r border-black/15 z-10"></div>
                 <div class="absolute bottom-0 left-0 w-6 h-6 md:w-8 md:h-8 border-b border-l border-black/15 z-10"></div>
                 <div class="absolute bottom-0 right-0 w-6 h-6 md:w-8 md:h-8 border-b border-r border-black/15 z-10"></div>
-
+                
                 <div class="w-14 h-14 md:w-16 md:h-16 border border-[#2d1b40]/10 rounded-full flex items-center justify-center mx-auto mb-4 bg-[#fdfbfd] shadow-sm">
                     <span class="text-2xl text-[#2d1b40]/40 font-light">⧖</span>
                 </div>
@@ -461,7 +461,7 @@ function renderMuestraFisica(data) {
         `;
         return;
     }
-
+    
     if (carouselWrapper) carouselWrapper.style.display = '';
 
     carouselItems.forEach((item, index) => {
@@ -469,10 +469,10 @@ function renderMuestraFisica(data) {
         const url = (typeof urlRaw === 'string') ? urlRaw.trim() : '';
         const tipoRaw = getKey(item, ['tipo', 'type', 'formato']);
         const tipo = (typeof tipoRaw === 'string' && tipoRaw.trim()) ? tipoRaw.toLowerCase() : '';
-
+        
         const isVideo = tipo.includes('video') || (url && (url.includes('youtube') || url.includes('youtu.be') || url.includes('vimeo') || url.includes('drive.google.com/file')));
         const isFoto = !isVideo && (tipo.includes('foto') || tipo.includes('img') || tipo.includes('imagen') || (url && url.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null));
-
+        
         const finalType = isVideo ? 'video' : (isFoto ? 'foto' : (url ? 'link' : 'empty'));
 
         const tituloRaw = getKey(item, ['titulo', 'title', 'nombre', 'encabezado']);
@@ -496,7 +496,7 @@ function renderMuestraFisica(data) {
                     const driveIdMatch = url.match(/\/d\/(.+?)\//);
                     if (driveIdMatch) embedUrl = `https://drive.google.com/file/d/${driveIdMatch[1]}/preview`;
                 }
-
+                
                 mediaHtml = `
                     <div class="aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-lg border border-[#2d1b40]/10 flex items-center justify-center">
                         <iframe src="${embedUrl}" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -548,7 +548,7 @@ function renderMuestraFisica(data) {
         `;
         container.appendChild(slideContainer);
 
-        // Populate navigation pagination dots natively reacting to scroll
+        // Populate navigation pagination dots natively reacting to scroll 
         if (carouselItems.length > 1 && navContainer) {
             const dot = document.createElement('button');
             dot.className = `h-1.5 rounded-full transition-all duration-500 ${index === 0 ? 'bg-[#6d4d8c] w-6' : 'bg-[#2d1b40]/15 hover:bg-[#6d4d8c]/40 w-1.5'}`;
@@ -560,7 +560,7 @@ function renderMuestraFisica(data) {
         }
     });
 
-    // Scroll listener calculates center-most slide iteratively
+    // Scroll listener calculates center-most slide iteratively 
     if (carouselItems.length > 1 && navContainer) {
         container.addEventListener('scroll', () => {
              const centerContainer = container.scrollLeft + (container.clientWidth / 2);
@@ -589,7 +589,7 @@ function updateInfoTexts(data) {
     // Helper flexible mapping con resguardo contra falsos positivos
     const getVal = (searchWords) => {
         const keys = Object.keys(data);
-
+        
         // 1. Coincidencia exacta (normalizada) primero
         const exactMatch = keys.find(k => {
             const normKey = k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
@@ -599,7 +599,7 @@ function updateInfoTexts(data) {
             });
         });
         if (exactMatch) return data[exactMatch];
-
+        
         // 2. Coincidencia parcial con exclusiones explícitas para evitar cross-contamination
         const partialMatch = keys.find(k => {
             const normKey = k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
@@ -682,7 +682,7 @@ function updateInfoTexts(data) {
     // Embed connected Video if link is provided, or show placeholder if empty or says "próximamente"
     const videoUrl = mVideo ? String(mVideo).trim() : '';
     const isProximamente = !videoUrl || videoUrl.toLowerCase().includes('proximamente') || videoUrl.toLowerCase().includes('próximamente') || videoUrl.toLowerCase() === 'no' || videoUrl.toLowerCase() === 'por venir';
-
+    
     const placeholderEl = document.getElementById('muestra-video-placeholder');
     const playerEl = document.getElementById('muestra-video-player');
     const iframeEl = document.getElementById('muestra-iframe');
@@ -694,13 +694,13 @@ function updateInfoTexts(data) {
     } else {
         // Resolve embed link
         let embedUrl = '';
-
+        
         // YouTube Support
         let ytMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i);
         if (ytMatch && ytMatch[1]) {
             embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
         }
-
+        
         // Vimeo Support
         if (!embedUrl) {
             let vimeoMatch = videoUrl.match(/(?:vimeo\.com\/)(?:video\/)?([0-9]+)/i);
@@ -708,7 +708,7 @@ function updateInfoTexts(data) {
                 embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}`;
             }
         }
-
+        
         // Google Drive Support
         if (!embedUrl) {
             let driveMatch = videoUrl.match(/\/(?:file\/)?d\/([a-zA-Z0-9_-]+)/);
@@ -759,7 +759,7 @@ function showTab(id, year = null, pushHistory = true) {
             grid.style.display = 'grid';
             void grid.offsetWidth; // Force reflow
             grid.classList.remove('inactive');
-
+            
             if (id === 'inicio') {
                 grid.style.transform = 'translate3d(0vw, 0vh, 0)';
             } else if (id === 'informacion') {
@@ -779,7 +779,7 @@ function showTab(id, year = null, pushHistory = true) {
     }
 
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-
+    
     const element = document.getElementById(id);
     if (element) {
         element.classList.add('active');
@@ -793,7 +793,7 @@ function showTab(id, year = null, pushHistory = true) {
     } else {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-
+    
     if (id === 'hitos') {
         renderCollection();
         if (mapGeneral) {
@@ -826,11 +826,11 @@ function showTab(id, year = null, pushHistory = true) {
         else if (id === 'mapa') path = '/mapa';
         else if (id === 'informacion') path = '/informacion';
         else if (id === 'muestra') path = '/muestra';
-
+        
         // Preserve any custom query params if present (like ?clave=...)
         const params = new URLSearchParams(window.location.search);
         const searchStr = params.toString() ? `?${params.toString()}` : '';
-
+        
         window.history.pushState({ tab: id, year: year }, '', path + searchStr);
     }
 }
@@ -845,7 +845,7 @@ function handleSearch() {
     const input = document.getElementById('search-input');
     const query = removeAccents(input.value.toLowerCase().trim());
     const suggestionsBox = document.getElementById('search-suggestions');
-
+    
     if (query.length > 0) {
         const filtered = getActiveBuildings().filter(b => {
             const nameNorm = removeAccents((b.name || '').toLowerCase());
@@ -866,7 +866,7 @@ function renderSuggestions(data) {
         box.classList.add('hidden');
         return;
     }
-
+    
     box.classList.remove('hidden');
     box.innerHTML = data.slice(0, 5).map(b => `
         <div onclick="selectSuggestion('${b.id}')" class="px-6 py-4 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-none flex items-center justify-between">
@@ -917,25 +917,25 @@ document.getElementById('split-resizer')?.addEventListener('mousedown', (e) => {
 
 document.addEventListener('mousemove', (e) => {
     if (!isResizing) return;
-
+    
     const container = document.getElementById('main-split-container');
     const panel = document.getElementById('detail-panel');
     const gridContainer = document.getElementById('grid-container');
-
+    
     if (!container || !panel || !gridContainer) return;
 
     const containerRect = container.getBoundingClientRect();
     const mouseX = e.clientX - containerRect.left;
     const percentage = Math.max(20, Math.min(80, (mouseX / containerRect.width) * 100));
-
+    
     lastSplitPercentage = percentage;
-
+    
     gridContainer.style.flex = `0 0 ${percentage}%`;
     gridContainer.style.width = `${percentage}%`;
-
+    
     panel.style.flex = `0 0 ${100 - percentage}%`;
     panel.style.width = `${100 - percentage}%`;
-
+    
     if (mapGeneral) mapGeneral.invalidateSize();
     if (mapDetail) mapDetail.invalidateSize();
 });
@@ -944,7 +944,7 @@ document.addEventListener('mouseup', () => {
     isResizing = false;
     document.body.style.cursor = 'default';
     document.body.classList.remove('select-none');
-
+    
     const container = document.getElementById('main-split-container');
     const panel = document.getElementById('detail-panel');
     if (container) {
@@ -982,9 +982,9 @@ let lastScrolls = {
 function handleHeaderScroll(scrollTop, source = 'window') {
     const header = document.getElementById('main-header');
     if (!header) return;
-
+    
     const lastScrollY = lastScrolls[source];
-
+    
     if (scrollTop > lastScrollY && scrollTop > 50) {
         header.style.transform = 'translateY(-100%)';
     } else {
@@ -1000,16 +1000,13 @@ document.getElementById('grid-container')?.addEventListener('scroll', (e) => han
 // VISTA DETALLE
 function getDriveDirectLink(url, sz = null) {
     if (!url) return '';
+    let qs = sz ? `?sz=${sz}` : '';
     let match = url.match(/\/(?:file\/)?d\/([a-zA-Z0-9_-]+)/);
-    if (!match) match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    if (match && match[1]) {
-        const id = match[1];
-        if (sz) return `https://lh3.googleusercontent.com/d/${id}=${sz}`;
-        return `https://lh3.googleusercontent.com/d/${id}`;
-    }
+    if (match && match[1]) return `/api/image/${match[1]}${qs}`;
+    match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) return `/api/image/${match[1]}${qs}`;
     return url;
 }
-
 
 async function showDetail(id, isFromMap = false, pushHistory = true) {
     const b = buildings.find(x => x.id === id);
@@ -1025,10 +1022,10 @@ async function showDetail(id, isFromMap = false, pushHistory = true) {
         else if (activeTab === 'hitos') path = '/hitos';
         else if (activeTab === 'mapa') path = '/mapa';
         else if (activeTab === 'informacion') path = '/informacion';
-
+        
         const params = new URLSearchParams(window.location.search);
         params.set('detalle', id);
-
+        
         window.history.pushState({ tab: activeTab, year: currentCollectionYear, detailId: id }, '', `${path}?${params.toString()}`);
     }
 
@@ -1064,7 +1061,7 @@ async function showDetail(id, isFromMap = false, pushHistory = true) {
         document.body.style.overflow = 'hidden';
 
         currentPhotoIndex = 0;
-
+        
         // Persist or fetch current building photos
         window.userBuildingPhotos = window.userBuildingPhotos || {};
         if (!window.userBuildingPhotos[id]) {
@@ -1074,7 +1071,7 @@ async function showDetail(id, isFromMap = false, pushHistory = true) {
             window.lastEntregaMap = window.lastEntregaMap || {};
             window.lastEntregaMap[id] = entregaData;
         }
-
+        
         const entrega = window.lastEntregaMap ? window.lastEntregaMap[id] : null;
         const creditWords = ['créditos', 'creditos', 'autor', 'autores', 'alumnos', 'integrantes', 'registro', 'fotografía', 'fotografias', 'fotógrafos', 'fotografos', 'estudiantes'];
         const creditosSec = entrega && entrega.secciones
@@ -1120,22 +1117,16 @@ async function showDetail(id, isFromMap = false, pushHistory = true) {
                                     const src400 = getDriveDirectLink(urlStr, 'w400');
                                     const src1200 = getDriveDirectLink(urlStr, 'w1200');
                                     const hasUrl = urlStr && (urlStr.includes('drive.google.com') || urlStr.includes('id='));
-                                    const lazySlide = i > 0;
-                                    const slideImgSrc = lazySlide ? `data-src="${srcBase}"` : `src="${srcBase}"`;
-                                    const slideImgSrcset = hasUrl
-                                        ? (lazySlide
-                                            ? `data-srcset="${src400} 400w, ${srcBase} 800w, ${src1200} 1200w"`
-                                            : `srcset="${src400} 400w, ${srcBase} 800w, ${src1200} 1200w"`)
-                                        : '';
+                                    const srcset = hasUrl ? `srcset="${src400} 400w, ${srcBase} 800w, ${src1200} 1200w"` : '';
                                     return `
                                     <div class="group min-w-full h-[50vh] lg:h-[70vh] flex items-center justify-center bg-gray-50/20 cursor-zoom-in relative" onclick="openFullscreen(${i})">
-                                        <img ${slideImgSrc}
-                                             ${slideImgSrcset} sizes="(max-width: 1024px) 100vw, 80vw"
+                                        <img src="${srcBase}"
+                                             ${srcset} sizes="(max-width: 1024px) 100vw, 80vw"
                                              class="max-w-full max-h-full object-contain select-none ${i === 0 ? '' : 'opacity-0'} transition-opacity duration-500"
                                              draggable="false"
-                                             ${i === 0 ? 'loading="eager"' : ''}
+                                             ${i === 0 ? 'loading="eager"' : 'loading="lazy"'}
                                              onload="this.classList.remove('opacity-0')"
-                                             onerror="this.onerror=null; this.removeAttribute('srcset'); this.classList.remove('opacity-0'); this.src='https://picsum.photos/seed/broken/1200/800?grayscale'">
+                                             onerror="this.src='https://picsum.photos/seed/broken/1200/800?grayscale'; this.onerror=null; this.onload=()=>this.classList.remove('opacity-0')">
                                         <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300">
                                             <span class="bg-black/80 text-white px-5 py-2.5 rounded-full text-[10px] uppercase tracking-[0.3em] font-bold font-sans backdrop-blur-md shadow-2xl">Pantalla completa</span>
                                         </div>
@@ -1143,7 +1134,7 @@ async function showDetail(id, isFromMap = false, pushHistory = true) {
                                     `;
                                 }).join('')}
                             </div>
-
+                                    
                             <!-- Controls -->
                             <div class="absolute inset-y-0 left-0 flex items-center z-10 pointer-events-none px-2 lg:px-6">
                                 <button onclick="stopProp(event); moveCarousel(-1)" class="w-12 h-12 flex items-center justify-center text-black/50 hover:text-black transition-all active:scale-75 pointer-events-auto cursor-pointer drop-shadow-sm">
@@ -1156,7 +1147,7 @@ async function showDetail(id, isFromMap = false, pushHistory = true) {
                                 </button>
                             </div>
                         </div>
-
+                                
                         <div class="px-0 py-3 flex justify-center items-center gap-4">
                             <p id="carousel-epigraph" class="font-sans text-[10px] md:text-sm leading-relaxed text-gray-400 uppercase tracking-[0.2em] max-w-xl italic text-center">
                                 ${typeof fotos[0] === 'object' ? (fotos[0].epigraph || '') : 'Documentación visual.'}
@@ -1217,9 +1208,7 @@ async function showDetail(id, isFromMap = false, pushHistory = true) {
                     <div id="map-detail" class="h-[400px] w-full shadow-inner rounded-3xl border border-gray-100 overflow-hidden grayscale contrast-125"></div>
                 </div>
             </div>
-        `;
-        window.currentPhotos = fotos;
-        observeLazyImages();
+        `;        window.currentPhotos = fotos;
 
         setTimeout(() => {
             initDetailMap(b.lat, b.lng, b.name);
@@ -1240,14 +1229,6 @@ function moveCarousel(direction) {
 
     if (track) {
         track.style.transform = `translateX(-${currentPhotoIndex * 100}%)`;
-        const currentSlide = track.children[currentPhotoIndex];
-        if (currentSlide) {
-            const img = currentSlide.querySelector('img');
-            if (img) {
-                if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
-                if (img.dataset.srcset) { img.srcset = img.dataset.srcset; delete img.dataset.srcset; }
-            }
-        }
     }
     if (epigraph) {
         const current = fotos[currentPhotoIndex];
@@ -1263,14 +1244,14 @@ function closeDetail(shouldGoBackHistory = true) {
 
     const header = document.getElementById('main-header');
     if (header) header.style.transform = 'translateY(0)';
-
+    
     const panel = document.getElementById('detail-panel');
     if (!panel) return;
-
+    
     // Scale down and fade out
     panel.classList.remove('scale-100', 'opacity-100');
     panel.classList.add('scale-95', 'opacity-0');
-
+    
     // Enable background scrolling if fullscreen is not shown
     const fullscreenOverlay = document.getElementById('fullscreen-overlay');
     const isFullscreenVisible = fullscreenOverlay && !fullscreenOverlay.classList.contains('pointer-events-none');
@@ -1290,7 +1271,7 @@ function closeDetail(shouldGoBackHistory = true) {
          else if (activeTab === 'hitos') path = '/hitos';
          else if (activeTab === 'mapa') path = '/mapa';
          else if (activeTab === 'informacion') path = '/informacion';
-
+         
          const params = new URLSearchParams(window.location.search);
          params.delete('detalle');
          params.delete('foto');
@@ -1307,7 +1288,7 @@ function renderPublicGrid(data = null) {
     if (data === null) data = getActiveBuildings();
     const grid = document.getElementById('buildings-public-grid');
     if (!grid) return;
-
+    
     // Empty state for future collections
     if (data.length === 0) {
         grid.innerHTML = `
@@ -1319,7 +1300,7 @@ function renderPublicGrid(data = null) {
         `;
         return;
     }
-
+    
     grid.classList.remove('grid-cols-1');
     grid.classList.add('md:grid-cols-2', 'xl:grid-cols-3');
 
@@ -1327,25 +1308,19 @@ function renderPublicGrid(data = null) {
         const fallback = `https://picsum.photos/seed/${b.id}/600/400?grayscale`;
         const baseSrc = getDriveDirectLink(b.imageUrl, 'w600') || fallback;
         const hasUrl = b.imageUrl && (b.imageUrl.includes('drive.google.com') || b.imageUrl.includes('id='));
-        const lazy = idx >= 4;
-        const imgSrc = lazy ? `data-src="${baseSrc}"` : `src="${baseSrc}"`;
-        const imgSrcset = hasUrl
-            ? (lazy
-                ? `data-srcset="${getDriveDirectLink(b.imageUrl, 'w400')} 400w, ${baseSrc} 600w, ${getDriveDirectLink(b.imageUrl, 'w800')} 800w"`
-                : `srcset="${getDriveDirectLink(b.imageUrl, 'w400')} 400w, ${baseSrc} 600w, ${getDriveDirectLink(b.imageUrl, 'w800')} 800w"`)
-            : '';
-        const loadingAttr = lazy ? '' : 'loading="eager"';
-
+        const srcset = hasUrl ? `srcset="${getDriveDirectLink(b.imageUrl, 'w400')} 400w, ${baseSrc} 600w, ${getDriveDirectLink(b.imageUrl, 'w800')} 800w"` : '';
+        const lazyAttr = idx < 4 ? 'loading="eager"' : 'loading="lazy"';
+        
         return `
         <div onclick="showDetail('${b.id}')" class="group cursor-pointer bg-white p-4 md:p-6 hover:bg-gray-50/50 transition-all duration-300 overflow-hidden relative">
             <div class="space-y-4 h-full">
                 <div class="w-full aspect-video overflow-hidden rounded-xl md:rounded-2xl bg-gray-50 shrink-0">
-                    <img ${imgSrc} ${imgSrcset} sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                    <img src="${baseSrc}" ${srcset} sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
                          class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 grayscale opacity-0"
                          alt="${b.name}"
-                         ${loadingAttr}
+                         ${lazyAttr}
                          onload="this.classList.remove('opacity-0')"
-                         onerror="this.onerror=null; this.removeAttribute('srcset'); this.classList.remove('opacity-0'); this.src='${fallback}'">
+                         onerror="this.src='${fallback}'; this.onerror=null; this.onload=()=>this.classList.remove('opacity-0')">
                 </div>
                 <div class="py-1 text-center flex-1 min-w-0">
                     <h3 class="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-black uppercase truncate w-full mb-1">${b.name}</h3>
@@ -1359,26 +1334,19 @@ function renderPublicGrid(data = null) {
         </div>
         `;
     }).join('');
-    observeLazyImages();
-    // Safety net: si ORB bloquea sin disparar onerror, revelar imágenes trabadas
-    setTimeout(() => {
-        document.querySelectorAll('#buildings-public-grid img.opacity-0').forEach(img => {
-            img.classList.remove('opacity-0');
-        });
-    }, 5000);
 }
 
 // MAPAS
 function initGeneralMap(data = null) {
     if (data === null) data = getActiveBuildings();
     if(!mapGeneral) {
-        mapGeneral = L.map('map-general', {
+        mapGeneral = L.map('map-general', { 
             zoomControl: false,
-            scrollWheelZoom: false
+            scrollWheelZoom: false 
         }).setView([-34.6037, -58.3816], 13);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(mapGeneral);
     }
-
+    
     mapGeneral.eachLayer((layer) => {
         if (layer instanceof L.CircleMarker) mapGeneral.removeLayer(layer);
     });
@@ -1408,13 +1376,13 @@ function initDetailMap(lat, lng, name) {
         mapDetail = null;
     }
 
-    mapDetail = L.map('map-detail', {
+    mapDetail = L.map('map-detail', { 
         zoomControl: false,
-        attributionControl: false
+        attributionControl: false 
     }).setView([lat, lng], 16);
-
+    
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(mapDetail);
-
+    
     markerDetail = L.circleMarker([lat, lng], {
         radius: 12,
         fillColor: "#000",
@@ -1423,7 +1391,7 @@ function initDetailMap(lat, lng, name) {
         opacity: 1,
         fillOpacity: 1
     }).addTo(mapDetail);
-
+    
     setTimeout(() => {
         if (mapDetail) mapDetail.invalidateSize();
     }, 500);
@@ -1455,12 +1423,12 @@ const darkVectorStyle = {
 function initAboutMap(data = null) {
     if (data === null) data = buildings;
     if (!data || data.length === 0) return;
-
+    
     const mapEl = document.getElementById('map-about');
     if (!mapEl) return;
 
     if (!mapAbout) {
-        mapAbout = L.map('map-about', {
+        mapAbout = L.map('map-about', { 
             zoomControl: false,
             scrollWheelZoom: false,
             doubleClickZoom: false,
@@ -1468,7 +1436,7 @@ function initAboutMap(data = null) {
             dragging: true,
             attributionControl: false
         }).setView([-34.6037, -58.3816], 13);
-
+        
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(mapAbout);
     }
 
@@ -1485,14 +1453,14 @@ function initAboutMap(data = null) {
             opacity: 1,
             fillOpacity: 1
         }).addTo(mapAbout);
-
+        
         m.on('click', () => {
             showTab('hitos', b.collectionYear);
             setTimeout(() => {
                 showDetail(b.id, true);
             }, 300);
         });
-
+        
         m.bindPopup(`<b class="font-sans text-[12px] uppercase tracking-widest text-[#0f131b] px-0.5 font-bold">${b.name}</b>`, { closeButton: false, offset: [0, -5] });
         m.on('mouseover', function() { this.openPopup(); });
         m.on('mouseout', function() { this.closePopup(); });
@@ -1501,16 +1469,16 @@ function initAboutMap(data = null) {
 
 function initFullPageMap() {
     if (!buildings || buildings.length === 0) return;
-
+    
     if (!mapFullPage) {
-        mapFullPage = L.map('map-fullpage', {
+        mapFullPage = L.map('map-fullpage', { 
             zoomControl: false,
-            scrollWheelZoom: true
+            scrollWheelZoom: true 
         }).setView([-34.6037, -58.3816], 13);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(mapFullPage);
         L.control.zoom({ position: 'bottomright' }).addTo(mapFullPage);
     }
-
+    
     mapFullPage.eachLayer((layer) => {
         if (layer instanceof L.CircleMarker) mapFullPage.removeLayer(layer);
     });
@@ -1524,11 +1492,11 @@ function initFullPageMap() {
             opacity: 1,
             fillOpacity: 0.8
         }).addTo(mapFullPage);
-
+        
         m.on('click', () => {
             showDetail(b.id, true);
         });
-
+        
         m.bindPopup(`<b class="font-sans text-[12px] uppercase tracking-widest text-black">${b.name}</b>`, { closeButton: false });
         m.on('mouseover', function() { this.openPopup(); });
         m.on('mouseout', function() { this.closePopup(); });
@@ -1539,7 +1507,7 @@ function initFullPageMap() {
 function openFullscreen(index, pushHistory = true) {
     const fotos = window.currentPhotos || [];
     if (fotos.length === 0) return;
-
+    
     currentPhotoIndex = index;
     const overlay = document.getElementById('fullscreen-overlay');
     const track = document.getElementById('fullscreen-track');
@@ -1552,44 +1520,38 @@ function openFullscreen(index, pushHistory = true) {
         else if (activeTab === 'hitos') path = '/hitos';
         else if (activeTab === 'mapa') path = '/mapa';
         else if (activeTab === 'informacion') path = '/informacion';
-
+        
         const params = new URLSearchParams(window.location.search);
         params.set('detalle', window.currentBuildingId || '');
         params.set('foto', index);
-
-        window.history.pushState({
-            tab: activeTab,
-            year: currentCollectionYear,
-            detailId: window.currentBuildingId,
-            fullscreenIndex: index
+        
+        window.history.pushState({ 
+            tab: activeTab, 
+            year: currentCollectionYear, 
+            detailId: window.currentBuildingId, 
+            fullscreenIndex: index 
         }, '', `${path}?${params.toString()}`);
     }
-
-        track.innerHTML = fotos.map((f, fi) => {
+    
+        track.innerHTML = fotos.map((f, i) => {
             const urlStr = typeof f === 'string' ? f : f.url;
             const srcBase = getDriveDirectLink(urlStr, 'w1200');
             const src800 = getDriveDirectLink(urlStr, 'w800');
             const srcMax = getDriveDirectLink(urlStr, 'w2000');
             const hasUrl = urlStr && (urlStr.includes('drive.google.com') || urlStr.includes('id='));
-            const lazyFs = fi !== currentPhotoIndex;
-            const fsImgSrc = lazyFs ? `data-src="${srcBase}"` : `src="${srcBase}"`;
-            const fsImgSrcset = hasUrl
-                ? (lazyFs
-                    ? `data-srcset="${src800} 800w, ${srcBase} 1200w, ${srcMax} 2000w"`
-                    : `srcset="${src800} 800w, ${srcBase} 1200w, ${srcMax} 2000w"`)
-                : '';
+            const srcset = hasUrl ? `srcset="${src800} 800w, ${srcBase} 1200w, ${srcMax} 2000w"` : '';
             return `
                 <div class="min-w-full h-full flex items-center justify-center bg-transparent">
-                    <img ${fsImgSrc}
-                         ${fsImgSrcset} sizes="100vw"
+                    <img id="fullscreen-img-${i}" src="${srcBase}"
+                         ${srcset} sizes="100vw"
                          class="max-w-full max-h-full m-auto object-contain select-none shadow-[20px_20px_60px_rgba(0,0,0,0.6)] opacity-0 transition-opacity duration-500"
                          draggable="false"
+                         loading="lazy"
                          onload="this.classList.remove('opacity-0')"
-                         onerror="this.onerror=null; this.removeAttribute('srcset'); this.classList.remove('opacity-0'); this.src='https://picsum.photos/seed/broken/1600/1200?grayscale'">
+                         onerror="this.src='https://picsum.photos/seed/broken/1600/1200?grayscale'; this.onerror=null; this.onload=()=>this.classList.remove('opacity-0')">
                 </div>
             `;
         }).join('');
-        observeLazyImages();
 
         // Navigation controls
         const existingControls = overlay.querySelector('.fullscreen-controls');
@@ -1602,7 +1564,7 @@ function openFullscreen(index, pushHistory = true) {
             <button onclick="moveFullscreenCarousel(1)" class="w-24 h-24 flex items-center justify-center text-white/50 hover:text-white transition-all text-8xl font-thin select-none cursor-pointer pointer-events-auto active:scale-75 drop-shadow-md">›</button>
         `;
         overlay.appendChild(controls);
-
+    
     updateFullscreenCarousel();
     overlay.classList.remove('opacity-0', 'pointer-events-none');
     document.body.style.overflow = 'hidden';
@@ -1633,7 +1595,7 @@ function closeFullscreen(shouldGoBackHistory = true) {
          else if (activeTab === 'hitos') path = '/hitos';
          else if (activeTab === 'mapa') path = '/mapa';
          else if (activeTab === 'informacion') path = '/informacion';
-
+         
          const params = new URLSearchParams(window.location.search);
          params.delete('foto');
          if (!window.currentBuildingId) {
@@ -1649,7 +1611,7 @@ function closeFullscreen(shouldGoBackHistory = true) {
 function moveFullscreenCarousel(direction) {
     const fotos = window.currentPhotos || [];
     if (fotos.length < 2) return;
-
+    
     currentPhotoIndex = (currentPhotoIndex + direction + fotos.length) % fotos.length;
     updateFullscreenCarousel();
 }
@@ -1658,22 +1620,14 @@ function updateFullscreenCarousel() {
     const fotos = window.currentPhotos || [];
     const track = document.getElementById('fullscreen-track');
     const info = document.getElementById('fullscreen-info');
-
+    
     if (track) {
         track.style.transform = `translateX(-${currentPhotoIndex * 100}%)`;
-        const fsCurrentSlide = track.children[currentPhotoIndex];
-        if (fsCurrentSlide) {
-            const img = fsCurrentSlide.querySelector('img');
-            if (img) {
-                if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
-                if (img.dataset.srcset) { img.srcset = img.dataset.srcset; delete img.dataset.srcset; }
-            }
-        }
     }
     if (info) {
         info.textContent = `${String(currentPhotoIndex + 1).padStart(2, '0')} / ${String(fotos.length).padStart(2, '0')}`;
     }
-
+    
     // Sync back to standard carousel
     const stdTrack = document.getElementById('carousel-track');
     const stdEpigraph = document.getElementById('carousel-epigraph');
@@ -1688,18 +1642,18 @@ function formatCredits(text) {
     if (!text) return '';
     let normalized = text.replace(/\s+y\s+/gi, ', ').replace(/;/g, ',');
     let parts = normalized.split(',').map(p => p.trim()).filter(Boolean);
-
+    
     let formattedParts = parts.map(name => {
         let words = name.split(/\s+/).filter(Boolean);
         if (words.length === 0) return '';
         if (words.length === 1) return words[0];
-
+        
         let firstName = words[0];
         let lastName = words[words.length - 1];
         let lastNameInitial = lastName[0].toUpperCase() + '.';
         return `${firstName} ${lastNameInitial}`;
     });
-
+    
     if (formattedParts.length === 0) return '';
     if (formattedParts.length === 1) return formattedParts[0];
     if (formattedParts.length === 2) return `${formattedParts[0]} y ${formattedParts[1]}`;
@@ -1726,8 +1680,8 @@ if (!window.history.state) {
     else if (p === '/informacion') initialTab = 'informacion';
     else if (p === '/muestra') initialTab = 'muestra';
 
-    window.history.replaceState({
-        tab: initialTab,
+    window.history.replaceState({ 
+        tab: initialTab, 
         year: currentCollectionYear,
         detailId: detailId || undefined,
         fullscreenIndex: fotoIndexStr !== null ? parseInt(fotoIndexStr, 10) : undefined
@@ -1749,7 +1703,7 @@ window.addEventListener('popstate', (event) => {
             // 1. Fullscreen coordination
             const fullscreenOverlay = document.getElementById('fullscreen-overlay');
             const isFullscreenCurrentlyOpen = window.isFullscreenOpen || (fullscreenOverlay && !fullscreenOverlay.classList.contains('pointer-events-none'));
-
+            
             if (isFullscreenCurrentlyOpen) {
                 if (state.fullscreenIndex === undefined) {
                     closeFullscreen(false);
@@ -1763,7 +1717,7 @@ window.addEventListener('popstate', (event) => {
             // 2. Detail panel coordination
             const detailPanel = document.getElementById('detail-panel');
             const isDetailCurrentlyOpen = detailPanel && !detailPanel.classList.contains('hidden');
-
+            
             if (isDetailCurrentlyOpen) {
                 if (!state.detailId) {
                     closeDetail(false);
@@ -1806,18 +1760,18 @@ loadData();
 
         const activeTab = document.querySelector('.tab-content.active')?.id;
         if (!['inicio', 'informacion', 'muestra'].includes(activeTab)) return;
-
+        
         // Prevent interference with maps, search elements, input forms, overlays or horizontally scrollable containers like carousels
-        if (e.target.closest('#map-about') ||
-            e.target.closest('.leaflet-container') ||
-            e.target.closest('#search-input') ||
+        if (e.target.closest('#map-about') || 
+            e.target.closest('.leaflet-container') || 
+            e.target.closest('#search-input') || 
             e.target.closest('#detail-container') ||
             e.target.closest('button') ||
             e.target.closest('.overflow-x-auto') ||
             e.target.closest('a')) {
             return;
         }
-
+        
         touchStartX = e.changedTouches[0].screenX;
         touchStartY = e.changedTouches[0].screenY;
     }, { passive: true });
@@ -1827,10 +1781,10 @@ loadData();
 
         const activeTab = document.querySelector('.tab-content.active')?.id;
         if (!['inicio', 'informacion', 'muestra'].includes(activeTab)) return;
-
-        if (e.target.closest('#map-about') ||
-            e.target.closest('.leaflet-container') ||
-            e.target.closest('#search-input') ||
+        
+        if (e.target.closest('#map-about') || 
+            e.target.closest('.leaflet-container') || 
+            e.target.closest('#search-input') || 
             e.target.closest('#detail-container') ||
             e.target.closest('button') ||
             e.target.closest('.overflow-x-auto') ||
@@ -1912,22 +1866,172 @@ if (_clave) {
 let isDemoRunning = false;
 let demoController = null;
 
+async function waitForFullscreenImageLoad(index, timeout = 10000) {
+    return new Promise((resolve) => {
+        const img = document.getElementById(`fullscreen-img-${index}`);
+        if (!img) return resolve();
+        if (img.complete && img.naturalHeight !== 0) return resolve();
+        
+        const timeoutId = setTimeout(() => resolve(), timeout); // fallback
+
+        img.addEventListener('load', () => {
+            clearTimeout(timeoutId);
+            resolve();
+        }, { once: true });
+        
+        img.addEventListener('error', () => {
+            clearTimeout(timeoutId);
+            resolve();
+        }, { once: true });
+    });
+}
+
 async function runDemoSequence() {
     isDemoRunning = true;
     demoController = new AbortController();
     const signal = demoController.signal;
 
-    const sleep = (ms) => new Promise(r => {
-        const timeout = setTimeout(r, ms);
-        signal.addEventListener('abort', () => {
-            clearTimeout(timeout);
-            r();
-        });
-    });
+    let isDemoPaused = true; // Empieza pausada
+
+    const checkPause = async () => {
+        while (isDemoPaused && !signal.aborted) {
+            await new Promise(r => setTimeout(r, 200));
+        }
+    };
+
+    const sleep = async (ms) => {
+        await checkPause();
+        if (signal.aborted) return;
+        
+        const INTERVAL = 100;
+        let elapsed = 0;
+        while (elapsed < ms && !signal.aborted) {
+            await checkPause();
+            if (signal.aborted) return;
+            await new Promise(r => {
+                const timeout = setTimeout(r, Math.min(INTERVAL, ms - elapsed));
+                signal.addEventListener('abort', () => { clearTimeout(timeout); r(); });
+            });
+            elapsed += INTERVAL;
+        }
+    };
+    
+    // Add floating demo steps UI
+    let demoTracker = document.getElementById('demo-tracker');
+    if (!demoTracker) {
+        demoTracker = document.createElement('div');
+        demoTracker.id = 'demo-tracker';
+        demoTracker.className = 'fixed top-24 left-6 lg:left-10 bg-black/80 backdrop-blur-md text-white p-4 rounded-xl shadow-2xl z-[9999] pointer-events-auto transition-opacity duration-500 overflow-hidden text-xs font-sans max-w-[250px] cursor-move select-none touch-none';
+        document.body.appendChild(demoTracker);
+        
+        let isDragging = false;
+        let startX, startY, initialX, initialY;
+        
+        const onDown = (e) => {
+            isDragging = true;
+            startX = e.clientX || (e.touches && e.touches[0].clientX);
+            startY = e.clientY || (e.touches && e.touches[0].clientY);
+            const rect = demoTracker.getBoundingClientRect();
+            initialX = rect.left;
+            initialY = rect.top;
+            demoTracker.style.transition = 'none'; // remove bounds transition while dragging
+            demoTracker.style.right = 'auto'; // ensure fixed positioning handles left/top directly
+            demoTracker.style.bottom = 'auto';
+        };
+        const onMove = (e) => {
+            if (!isDragging) return;
+            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            const dx = clientX - startX;
+            const dy = clientY - startY;
+            demoTracker.style.left = `${initialX + dx}px`;
+            demoTracker.style.top = `${initialY + dy}px`;
+        };
+        const onUp = () => {
+            if (isDragging) {
+                isDragging = false;
+                demoTracker.style.transition = 'opacity 0.5s';
+            }
+        };
+
+        demoTracker.addEventListener('mousedown', onDown);
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+        demoTracker.addEventListener('touchstart', onDown, {passive: false});
+        document.addEventListener('touchmove', onMove, {passive: false});
+        document.addEventListener('touchend', onUp);
+    }
+    demoTracker.style.opacity = '1';
+    demoTracker.style.pointerEvents = 'auto';
+    
+    // Lista de pasos guardada en el tracker
+    const demoSteps = [
+        "1. Animación Inicial",
+        "2. Sobre el Proyecto",
+        "3. Muestra Física",
+        "4. Listado de Hitos",
+        "5. Detalle y Fotos",
+        "6. Interacción Mapa"
+    ];
+
+    const updateDemoStep = (index, subStep = "") => {
+        if (!demoTracker) return;
+        
+        demoTracker.innerHTML = `
+            <div class="font-bold uppercase tracking-widest text-[10px] mb-2 text-white/50 flex justify-between items-center">
+                <span>Demostración ${isDemoPaused ? 'Pausada' : 'Activa'}</span>
+                ${isDemoPaused ? '<div class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>' : '<div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>'}
+            </div>
+            <ul class="space-y-1.5 flex flex-col mb-4">
+                ${demoSteps.map((step, i) => `
+                    <li class="flex flex-col gap-1 transition-all duration-300 ${i === index ? 'text-white translate-x-1' : (i < index ? 'text-white/30' : 'text-white/20')}">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1.5 h-1.5 rounded-full ${i === index ? 'bg-white shadow-[0_0_8px_white]' : 'bg-current'} shrink-0"></div>
+                            <span class="${i === index ? 'font-semibold' : ''}">${step}</span>
+                        </div>
+                        ${i === index && subStep ? `<span class="text-[9px] uppercase tracking-widest text-white/60 pl-3.5 italic animate-pulse">${subStep}</span>` : ''}
+                    </li>
+                `).join('')}
+            </ul>
+            <div class="flex gap-2 border-t border-white/20 pt-3 pointer-events-auto mt-2">
+                <button id="demo-pause-btn" class="flex-1 ${isDemoPaused ? 'bg-green-600 hover:bg-green-500' : 'bg-white/20 hover:bg-white/30'} text-white rounded py-1.5 px-2 text-[10px] uppercase font-bold transition-colors shadow-sm">
+                    ${isDemoPaused ? '▶ Iniciar' : '⏸ Pausa'}
+                </button>
+                <button id="demo-close-btn" class="flex-1 bg-red-500/60 hover:bg-red-500/80 text-white rounded py-1.5 px-2 text-[10px] uppercase font-bold transition-colors shadow-sm">
+                    Cerrar
+                </button>
+            </div>
+        `;
+        
+        const pauseBtn = document.getElementById('demo-pause-btn');
+        if (pauseBtn) {
+            pauseBtn.onclick = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                isDemoPaused = !isDemoPaused;
+                updateDemoStep(index, subStep); // refresh UI
+            };
+            pauseBtn.onmousedown = e => e.stopPropagation();
+            pauseBtn.ontouchstart = e => e.stopPropagation();
+        }
+        
+        const closeBtn = document.getElementById('demo-close-btn');
+        if (closeBtn) {
+            closeBtn.onclick = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                stopDemo();
+            };
+            closeBtn.onmousedown = e => e.stopPropagation();
+            closeBtn.ontouchstart = e => e.stopPropagation();
+        }
+    };
 
     // Hide demo button
     const demoBtn = document.getElementById('demo-btn');
     if (demoBtn) demoBtn.style.opacity = '0';
+
+    updateDemoStep(0, "Esperando para iniciar...");
 
     // Show a floating "Stop Demo"
     let stopBtn = document.getElementById('stop-demo-btn');
@@ -1950,83 +2054,191 @@ async function runDemoSequence() {
 
     while (!signal.aborted) {
         try {
+            // Re-trigger animation logic precisely at the start of the loop
+            document.querySelectorAll('.letter').forEach(l => {
+                l.classList.remove('mobile-animate-letter');
+                void l.offsetWidth; // trigger reflow
+                l.classList.add('mobile-animate-letter');
+            });
+            document.querySelectorAll('.mobile-animate-highlight, [class*="highlightMobile"]').forEach(el => {
+                el.classList.remove('mobile-animate-highlight');
+                void el.offsetWidth;
+                el.classList.add('mobile-animate-highlight');
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.letter').forEach(l => l.classList.remove('mobile-animate-letter'));
+                document.querySelectorAll('.mobile-animate-highlight').forEach(el => el.classList.remove('mobile-animate-highlight'));
+            }, 4000);
+
+            // Dejar tiempo Inicial para ver la animación de MIRADAS y patrimonio
+            updateDemoStep(0, "Reproduciendo animaciones iniciales");
+            if (signal.aborted) break;
+            await sleep(6000);
+
             // 1. Mostrar 'Sobre el Proyecto'
+            updateDemoStep(1, "Abriendo pestaña Sobre el Proyecto");
             if (signal.aborted) break;
             showTab('informacion', null, false);
-            await sleep(6000);
+            await sleep(4000);
 
             // Scroll 'Sobre el Proyecto'
             if (signal.aborted) break;
+            updateDemoStep(1, "Haciendo scroll para leer información");
             const infoSec = document.getElementById('informacion');
-            if (infoSec) infoSec.scrollTo({ top: window.innerHeight * 0.4, behavior: 'smooth' });
+            if (infoSec) infoSec.scrollTo({ top: infoSec.scrollHeight, behavior: 'smooth' });
             await sleep(6000);
 
             if (infoSec) infoSec.scrollTo({ top: 0, behavior: 'smooth' });
             await sleep(2000);
 
             // 2. Volver a 'Inicio'
+            updateDemoStep(1, "Regresando a inicio");
+            if (signal.aborted) break;
+            showTab('inicio', null, false);
+            await sleep(3000);
+            
+            // 3. Mostrar 'Muestra'
+            updateDemoStep(2, "Abriendo pestaña Muestra Física");
+            if (signal.aborted) break;
+            showTab('muestra', null, false);
+            await sleep(4000); 
+
+            // Scroll 'Muestra'
+            if (signal.aborted) break;
+            updateDemoStep(2, "Haciendo scroll en contenido de muestra");
+            const muestraSec = document.getElementById('muestra');
+            if (muestraSec) muestraSec.scrollTo({ top: muestraSec.scrollHeight, behavior: 'smooth' });
+            await sleep(6000);
+
+            if (muestraSec) muestraSec.scrollTo({ top: 0, behavior: 'smooth' });
+            await sleep(2000);
+
+            // 4. Volver a 'Inicio'
+            updateDemoStep(2, "Regresando a inicio");
             if (signal.aborted) break;
             showTab('inicio', null, false);
             await sleep(3000);
 
-            // 3. Mostrar 'Hitos' (Grilla)
+            // 5. Mostrar 'Hitos' (Grilla)
+            updateDemoStep(3, "Abriendo pestaña Listado de Hitos");
             if (signal.aborted) break;
             showTab('hitos', currentCollectionYear, false);
             await sleep(4000);
 
-            // Scroll 'Hitos'
+            // Scroll 'Hitos' repasando los edificios
             if (signal.aborted) break;
+            updateDemoStep(3, "Navegando tarjetas de edificios");
             const gridEl = document.getElementById('grid-container');
-            if (gridEl) gridEl.scrollTo({ top: window.innerHeight * 0.6, behavior: 'smooth' });
-            await sleep(5000);
-            if (gridEl) gridEl.scrollTo({ top: 0, behavior: 'smooth' });
-            await sleep(2000);
-
-            // 4. Abrir un detalle (el primero del año)
-            if (signal.aborted) break;
-            const firstHito = buildings.find(b => b.year === currentCollectionYear);
-            if (firstHito) {
-                showDetail(firstHito.id, false, false);
+            if (gridEl) {
+                const cards = gridEl.querySelectorAll('.group.cursor-pointer');
+                if (cards.length > 0) {
+                    for (let i = 0; i < cards.length; i++) {
+                        if (signal.aborted) break;
+                        cards[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        await sleep(1500); // Darle tiempo a la animación de verse, pero acelerando
+                    }
+                    if (signal.aborted) break;
+                    gridEl.scrollTo({ top: 0, behavior: 'smooth' });
+                    await sleep(2000);
+                } else {
+                    gridEl.scrollTo({ top: gridEl.scrollHeight, behavior: 'smooth' });
+                    await sleep(6000);
+                    if (signal.aborted) break;
+                    gridEl.scrollTo({ top: 0, behavior: 'smooth' });
+                    await sleep(2000);
+                }
+            } else {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                 await sleep(6000);
+                if (signal.aborted) break;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                await sleep(2000);
+            }
 
-                if (signal.aborted) { closeDetail(false); break; }
-                const detPanel = document.getElementById('detail-panel');
-                if (detPanel) detPanel.scrollTo({ top: window.innerHeight * 0.7, behavior: 'smooth' });
-                await sleep(5000);
-
-                if (signal.aborted) { closeDetail(false); break; }
-                if (detPanel) detPanel.scrollTo({ top: 0, behavior: 'smooth' });
+            // 5. Abrir un detalle (el primero del año)
+            updateDemoStep(4, "Abriendo detalle del primer edificio seleccionado");
+            if (signal.aborted) break;
+            const firstHito = buildings.find(b => String(b.collectionYear) === String(currentCollectionYear));
+            if (firstHito) {
+                await showDetail(firstHito.id, false, false);
                 await sleep(3000);
 
                 if (signal.aborted) { closeDetail(false); break; }
-                if (window.userBuildingPhotos && window.userBuildingPhotos[firstHito.id] && window.userBuildingPhotos[firstHito.id].length > 0) {
+                const detPanel = document.getElementById('detail-panel');
+                if (detPanel) {
+                    // Smooth, slower scroll down for reading
+                    updateDemoStep(4, "Haciendo scroll por información del edificio");
+                    detPanel.scrollTo({ top: detPanel.scrollHeight / 3, behavior: 'smooth' });
+                    await sleep(4500);
+                    if (signal.aborted) { closeDetail(false); break; }
+                    detPanel.scrollTo({ top: (detPanel.scrollHeight * 2) / 3, behavior: 'smooth' });
+                    await sleep(4500);
+                    if (signal.aborted) { closeDetail(false); break; }
+                    detPanel.scrollTo({ top: detPanel.scrollHeight, behavior: 'smooth' });
+                    await sleep(5000); // Tiempo prudencial para leer el detalle
+                    
+                    if (signal.aborted) { closeDetail(false); break; }
+                    // scroll back up completely
+                    detPanel.scrollTo({ top: 0, behavior: 'smooth' });
+                    await sleep(4000);
+                }
+
+                if (signal.aborted) { closeDetail(false); break; }
+                const photos = window.userBuildingPhotos ? window.userBuildingPhotos[firstHito.id] : null;
+                if (photos && photos.length > 0) {
+                    updateDemoStep(4, "Abriendo visor de fotos a pantalla completa");
                     openFullscreen(0, false);
-                    await sleep(4000);
+                    await waitForFullscreenImageLoad(0);
+                    await sleep(4000); // Wait after loaded to appreciate the content
+
+                    for (let i = 1; i < photos.length; i++) {
+                        if (signal.aborted) { break; }
+                        moveFullscreenCarousel(1);
+                        await waitForFullscreenImageLoad(i);
+                        await sleep(1500); // Wait for interaction-like reading time, más fluido
+                    }
 
                     if (signal.aborted) { closeFullscreen(false); closeDetail(false); break; }
-                    moveFullscreenCarousel(1);
-                    await sleep(4000);
-
-                    if (signal.aborted) { closeFullscreen(false); closeDetail(false); break; }
-                    moveFullscreenCarousel(1);
-                    await sleep(4000);
-
-                    if (signal.aborted) { closeFullscreen(false); closeDetail(false); break; }
+                    updateDemoStep(4, "Cerrando visor y regresando al detalle");
                     closeFullscreen(false);
                     await sleep(3000);
                 }
 
                 if (signal.aborted) { closeDetail(false); break; }
+                updateDemoStep(4, "Cerrando detalle de edificio y volviendo a la lista");
                 closeDetail(false);
-                await sleep(3000);
+                await sleep(4000); // Wait a bit after closing detail to show we are back at the list
             }
 
-            // 5. Mostrar Mapa
+            // 6. Volver al listado de edificios está hecho por closeDetail() al final del bloque anterior
             if (signal.aborted) break;
+            
+            // Efecto visual de que se seleccionó el mapa
+            updateDemoStep(5, "Volviendo a inicio y seleccionando Mapa");
+            const mapBtn = document.querySelector('button[onclick*="showTab(\'mapa\'"]');
+            if (mapBtn) {
+                // Focus styling to highlight what happens next
+                mapBtn.style.transition = 'all 0.5s';
+                mapBtn.style.transform = 'scale(1.2)';
+                mapBtn.style.backgroundColor = 'rgba(0,0,0,0.1)';
+                mapBtn.style.borderRadius = '8px';
+                mapBtn.style.padding = '8px';
+                mapBtn.style.outline = '2px solid rgba(0,0,0,0.2)';
+                await sleep(1500);
+                mapBtn.style.transform = 'scale(0.95)';
+                mapBtn.style.backgroundColor = 'rgba(0,0,0,0.2)';
+                await sleep(300);
+                mapBtn.style.transform = '';
+                mapBtn.style.backgroundColor = '';
+                mapBtn.style.padding = '';
+                mapBtn.style.outline = '';
+            }
+            
             showTab('mapa', currentCollectionYear, false);
-            await sleep(5000);
+            await sleep(4000);
 
             // Abrir un tooltip del mapa
+            updateDemoStep(5, "Centrando el mapa en el edificio seleccionado");
             if (signal.aborted) break;
             if (firstHito && typeof markerDetail !== 'undefined' && markerDetail[firstHito.id]) {
                 const mapId = 'mapa-' + currentCollectionYear;
@@ -2035,6 +2247,7 @@ async function runDemoSequence() {
                 }
                 await sleep(3000);
                 if (signal.aborted) break;
+                updateDemoStep(5, "Abriendo información destacada del cartel en el mapa");
                 markerDetail[firstHito.id].openPopup();
                 await sleep(6000);
                 if (signal.aborted) { markerDetail[firstHito.id].closePopup(); break; }
@@ -2043,11 +2256,16 @@ async function runDemoSequence() {
                 await sleep(6000);
             }
 
-            // 6. Volver a 'Inicio'
+            // 7. Volver a 'Inicio'
+            updateDemoStep(5, "Cerrando y regresando a Inicio para finalizar");
             if (signal.aborted) break;
             showTab('inicio', null, false);
             await sleep(5000);
 
+            if (!signal.aborted && demoTracker) {
+                demoTracker.style.opacity = '0';
+                await sleep(500);
+            }
         } catch (e) {
             console.error("Demo seq error", e);
             if (signal.aborted) break;
@@ -2063,30 +2281,40 @@ function stopDemo() {
     }
     const stopBtn = document.getElementById('stop-demo-btn');
     if (stopBtn) stopBtn.style.display = 'none';
-
+    
     const demoBtn = document.getElementById('demo-btn');
     if (demoBtn) demoBtn.style.opacity = '1';
-
+    
+    const demoTracker = document.getElementById('demo-tracker');
+    if (demoTracker) demoTracker.remove();
+    
     if (window.isFullscreenOpen) closeFullscreen(false);
     const detPanel = document.getElementById('detail-panel');
     if (detPanel && !detPanel.classList.contains('hidden')) closeDetail(false);
 }
 
+// Hide QR code upon interaction
+function hideQRCode() {
+    const qrContainer = document.getElementById('desktop-qr-container');
+    if (qrContainer && !qrContainer.classList.contains('opacity-0')) {
+        qrContainer.style.opacity = '0';
+        qrContainer.style.pointerEvents = 'none';
+        setTimeout(() => qrContainer.style.display = 'none', 500);
+        // Remove event listeners once hidden
+        document.removeEventListener('click', hideQRCode);
+        document.removeEventListener('touchstart', hideQRCode);
+        document.removeEventListener('scroll', hideQRCode, { capture: true });
+        document.removeEventListener('wheel', hideQRCode, { capture: true });
+    }
+}
+
+document.addEventListener('click', hideQRCode);
+document.addEventListener('touchstart', hideQRCode);
+document.addEventListener('scroll', hideQRCode, { capture: true });
+document.addEventListener('wheel', hideQRCode, { capture: true });
+
+
 const _isDemoMode = new URLSearchParams(window.location.search).get('demo');
 if (_isDemoMode === 'ok' || _isDemoMode === 'true' || _isDemoMode === '1') {
     setTimeout(runDemoSequence, 1000);
-}
-// Lazy load con IntersectionObserver
-const lazyObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        const img = entry.target;
-        if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
-        if (img.dataset.srcset) { img.srcset = img.dataset.srcset; delete img.dataset.srcset; }
-        lazyObserver.unobserve(img);
-    });
-}, { rootMargin: '200px' });
-
-function observeLazyImages() {
-    document.querySelectorAll('img[data-src]').forEach(img => lazyObserver.observe(img));
 }

@@ -1,8 +1,8 @@
 // Pinga la app en Render cada 14 min para evitar que se duerma (free tier = 15 min).
-// Uso: APP_URL=https://miradas-2026.onrender.com node keep-alive.js
+// Uso: node keep-alive.js
 
-const APP_URL = process.env.APP_URL || 'https://miradas-2026.onrender.com';
-const ENDPOINT = `${APP_URL}/health`;
+const APP_URL = 'https://miradas.onrender.com';
+const ENDPOINT = `${APP_URL}/api/collections`;
 const INTERVAL_MS = 14 * 60 * 1000;
 
 async function ping() {

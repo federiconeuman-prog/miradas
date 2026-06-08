@@ -43,13 +43,6 @@
             .mobile-animate-card-corners { animation: cardCorners 4s infinite alternate ease-in-out; }
             .mobile-animate-card-text { animation: cardText 4s infinite alternate ease-in-out; }
             
-            .mobile-animate-letter { animation: letterMobileColor 3s forwards ease-in-out; }
-            .mobile-animate-letter::before {
-                animation: letterMobileBefore 3s forwards ease-in-out;
-                animation-delay: inherit;
-            }
-            .mobile-animate-highlight { animation: highlightMobile 3s forwards ease-in-out; }
-            
             @keyframes pulseLineV {
                 0%, 100% { background-color: rgba(0,0,0,0.1); }
                 50% { background-color: rgba(0,0,0,0.4); }
@@ -94,21 +87,30 @@
                 0% { color: rgba(0,0,0,0.3); }
                 100% { color: rgba(0,0,0,0.6); }
             }
-            @keyframes letterMobileColor {
-                0%, 30% { color: #000; }
-                50%, 80% { color: rgba(0,0,0,0.1); }
-                100% { color: #000; }
-            }
-            @keyframes letterMobileBefore {
-                0%, 30% { opacity: 0; mask-image: none; -webkit-mask-image: none; }
-                50%, 80% { opacity: 1; mask-image: none; -webkit-mask-image: none; }
-                100% { opacity: 0; }
-            }
-            @keyframes highlightMobile {
-                0%, 30% { color: rgba(0,0,0,0.9); text-shadow: none; }
-                50%, 80% { color: rgba(0,0,0,0.4); text-shadow: 0 0 8px rgba(0,0,0,0.2); }
-                100% { color: rgba(0,0,0,0.9); text-shadow: none; }
-            }
+        }
+
+        /* Initial Load Animations (All devices) */
+        .mobile-animate-letter { animation: letterMobileColor 3s forwards ease-in-out; }
+        .mobile-animate-letter::before {
+            animation: letterMobileBefore 3s forwards ease-in-out;
+            animation-delay: inherit;
+        }
+        .mobile-animate-highlight { animation: highlightMobile 3s forwards ease-in-out; }
+
+        @keyframes letterMobileColor {
+            0%, 30% { color: #000; }
+            50%, 80% { color: rgba(0,0,0,0.1); }
+            100% { color: #000; }
+        }
+        @keyframes letterMobileBefore {
+            0%, 30% { opacity: 0; mask-image: none; -webkit-mask-image: none; }
+            50%, 80% { opacity: 1; mask-image: none; -webkit-mask-image: none; }
+            100% { opacity: 0; }
+        }
+        @keyframes highlightMobile {
+            0%, 30% { color: rgba(0,0,0,0.9); text-shadow: none; }
+            50%, 80% { color: rgba(0,0,0,0.4); text-shadow: 0 0 8px rgba(0,0,0,0.2); }
+            100% { color: rgba(0,0,0,0.9); text-shadow: none; }
         }
         
         /* Hide scrollbar for carousel but keep functionality */
@@ -291,6 +293,16 @@
             </div>
             <div id="years-container" class="flex flex-col gap-10 items-center justify-center relative z-10 pt-4 md:pt-10 pb-16">
                 <!-- Populado dinámicamente por app.js desde Google Sheets -->
+            </div>
+            
+            <!-- QR CODE (Desktop / Tablet) -->
+            <div id="desktop-qr-container" class="absolute bottom-6 left-6 sm:bottom-10 sm:left-10 z-50 flex flex-col items-center gap-3 bg-white/80 backdrop-blur-xl p-3 sm:p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-black/5 transition-all duration-500 hover:scale-105 origin-bottom-left max-w-[110px] sm:max-w-[150px] hidden md:flex animate-fade-in" style="animation-delay: 1.5s;">
+                <div class="bg-white p-1.5 sm:p-2 rounded-xl shadow-sm border border-black/5 w-full">
+                    <img src="QR.png" alt="Código QR" class="w-full h-auto aspect-square rounded-lg mix-blend-multiply">
+                </div>
+                <div class="text-[8px] sm:text-[10px] font-sans font-bold uppercase tracking-widest text-black/60 text-center leading-snug">
+                    Abrilo en<br>tu celular
+                </div>
             </div>
  
             <!-- Arrow pointing RIGHT: Sobre el Proyecto -->

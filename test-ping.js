@@ -1,7 +1,7 @@
 // Verifica el estado real de la app en Render.
 // Uso: APP_URL=https://miradas-2026.onrender.com node test-ping.js
 
-const APP_URL = process.env.APP_URL || 'https://miradas-2026.onrender.com';
+const APP_URL = process.env.APP_URL || 'https://miradas.onrender.com';
 const ENDPOINT = `${APP_URL}/health`;
 
 function ok(msg)   { console.log(`  ✓ ${msg}`); }
