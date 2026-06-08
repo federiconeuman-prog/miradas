@@ -1000,11 +1000,13 @@ document.getElementById('grid-container')?.addEventListener('scroll', (e) => han
 // VISTA DETALLE
 function getDriveDirectLink(url, sz = null) {
     if (!url) return '';
-    let qs = sz ? `?sz=${sz}` : '';
     let match = url.match(/\/(?:file\/)?d\/([a-zA-Z0-9_-]+)/);
-    if (match && match[1]) return `/api/image/${match[1]}${qs}`;
-    match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    if (match && match[1]) return `/api/image/${match[1]}${qs}`;
+    if (!match) match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+        const id = match[1];
+        if (sz) return `https://lh3.googleusercontent.com/d/${id}=${sz}`;
+        return `https://lh3.googleusercontent.com/d/${id}`;
+    }
     return url;
 }
 
@@ -1117,16 +1119,22 @@ async function showDetail(id, isFromMap = false, pushHistory = true) {
                                     const src400 = getDriveDirectLink(urlStr, 'w400');
                                     const src1200 = getDriveDirectLink(urlStr, 'w1200');
                                     const hasUrl = urlStr && (urlStr.includes('drive.google.com') || urlStr.includes('id='));
-                                    const srcset = hasUrl ? `srcset="${src400} 400w, ${srcBase} 800w, ${src1200} 1200w"` : '';
+                                    const lazySlide = i > 0;
+                                    const slideImgSrc = lazySlide ? `data-src="${srcBase}"` : `src="${srcBase}"`;
+                                    const slideImgSrcset = hasUrl
+                                        ? (lazySlide
+                                            ? `data-srcset="${src400} 400w, ${srcBase} 800w, ${src1200} 1200w"`
+                                            : `srcset="${src400} 400w, ${srcBase} 800w, ${src1200} 1200w"`)
+                                        : '';
                                     return `
                                     <div class="group min-w-full h-[50vh] lg:h-[70vh] flex items-center justify-center bg-gray-50/20 cursor-zoom-in relative" onclick="openFullscreen(${i})">
-                                        <img src="${srcBase}"
-                                             ${srcset} sizes="(max-width: 1024px) 100vw, 80vw"
+                                        <img ${slideImgSrc}
+                                             ${slideImgSrcset} sizes="(max-width: 1024px) 100vw, 80vw"
                                              class="max-w-full max-h-full object-contain select-none ${i === 0 ? '' : 'opacity-0'} transition-opacity duration-500"
                                              draggable="false"
-                                             ${i === 0 ? 'loading="eager"' : 'loading="lazy"'}
+                                             ${i === 0 ? 'loading="eager"' : ''}
                                              onload="this.classList.remove('opacity-0')"
-                                             onerror="this.src='https://picsum.photos/seed/broken/1200/800?grayscale'; this.onerror=null; this.onload=()=>this.classList.remove('opacity-0')">
+                                             onerror="this.onerror=null; this.removeAttribute('srcset'); this.classList.remove('opacity-0'); this.src='https://picsum.photos/seed/broken/1200/800?grayscale'">
                                         <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300">
                                             <span class="bg-black/80 text-white px-5 py-2.5 rounded-full text-[10px] uppercase tracking-[0.3em] font-bold font-sans backdrop-blur-md shadow-2xl">Pantalla completa</span>
                                         </div>
@@ -1208,7 +1216,18 @@ async function showDetail(id, isFromMap = false, pushHistory = true) {
                     <div id="map-detail" class="h-[400px] w-full shadow-inner rounded-3xl border border-gray-100 overflow-hidden grayscale contrast-125"></div>
                 </div>
             </div>
-        `;        window.currentPhotos = fotos;
+        `;
+        window.currentPhotos = fotos;
+        observeLazyImages();
+        // Precargar la segunda foto para que el primer swipe sea instantáneo
+        setTimeout(() => {
+            const track = document.getElementById('carousel-track');
+            if (track && track.children[1]) {
+                const img = track.children[1].querySelector('img');
+                if (img && img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+                if (img && img.dataset.srcset) { img.srcset = img.dataset.srcset; delete img.dataset.srcset; }
+            }
+        }, 800);
 
         setTimeout(() => {
             initDetailMap(b.lat, b.lng, b.name);
@@ -1229,6 +1248,16 @@ function moveCarousel(direction) {
 
     if (track) {
         track.style.transform = `translateX(-${currentPhotoIndex * 100}%)`;
+        // Cargar imagen actual + precargar la siguiente y la anterior
+        [currentPhotoIndex, currentPhotoIndex + 1, currentPhotoIndex - 1].forEach(adjIdx => {
+            const slide = track.children[(adjIdx + fotos.length) % fotos.length];
+            if (!slide) return;
+            const img = slide.querySelector('img');
+            if (img) {
+                if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+                if (img.dataset.srcset) { img.srcset = img.dataset.srcset; delete img.dataset.srcset; }
+            }
+        });
     }
     if (epigraph) {
         const current = fotos[currentPhotoIndex];
@@ -1308,19 +1337,25 @@ function renderPublicGrid(data = null) {
         const fallback = `https://picsum.photos/seed/${b.id}/600/400?grayscale`;
         const baseSrc = getDriveDirectLink(b.imageUrl, 'w600') || fallback;
         const hasUrl = b.imageUrl && (b.imageUrl.includes('drive.google.com') || b.imageUrl.includes('id='));
-        const srcset = hasUrl ? `srcset="${getDriveDirectLink(b.imageUrl, 'w400')} 400w, ${baseSrc} 600w, ${getDriveDirectLink(b.imageUrl, 'w800')} 800w"` : '';
-        const lazyAttr = idx < 4 ? 'loading="eager"' : 'loading="lazy"';
-        
+        const lazy = idx >= 4;
+        const imgSrc = lazy ? `data-src="${baseSrc}"` : `src="${baseSrc}"`;
+        const imgSrcset = hasUrl
+            ? (lazy
+                ? `data-srcset="${getDriveDirectLink(b.imageUrl, 'w400')} 400w, ${baseSrc} 600w, ${getDriveDirectLink(b.imageUrl, 'w800')} 800w"`
+                : `srcset="${getDriveDirectLink(b.imageUrl, 'w400')} 400w, ${baseSrc} 600w, ${getDriveDirectLink(b.imageUrl, 'w800')} 800w"`)
+            : '';
+        const loadingAttr = lazy ? '' : 'loading="eager"';
+
         return `
         <div onclick="showDetail('${b.id}')" class="group cursor-pointer bg-white p-4 md:p-6 hover:bg-gray-50/50 transition-all duration-300 overflow-hidden relative">
             <div class="space-y-4 h-full">
                 <div class="w-full aspect-video overflow-hidden rounded-xl md:rounded-2xl bg-gray-50 shrink-0">
-                    <img src="${baseSrc}" ${srcset} sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                    <img ${imgSrc} ${imgSrcset} sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
                          class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 grayscale opacity-0"
                          alt="${b.name}"
-                         ${lazyAttr}
+                         ${loadingAttr}
                          onload="this.classList.remove('opacity-0')"
-                         onerror="this.src='${fallback}'; this.onerror=null; this.onload=()=>this.classList.remove('opacity-0')">
+                         onerror="this.onerror=null; this.removeAttribute('srcset'); this.classList.remove('opacity-0'); this.src='${fallback}'">
                 </div>
                 <div class="py-1 text-center flex-1 min-w-0">
                     <h3 class="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-black uppercase truncate w-full mb-1">${b.name}</h3>
@@ -1334,6 +1369,10 @@ function renderPublicGrid(data = null) {
         </div>
         `;
     }).join('');
+    observeLazyImages();
+    setTimeout(() => {
+        document.querySelectorAll('#buildings-public-grid img.opacity-0').forEach(img => img.classList.remove('opacity-0'));
+    }, 5000);
 }
 
 // MAPAS
@@ -1533,25 +1572,31 @@ function openFullscreen(index, pushHistory = true) {
         }, '', `${path}?${params.toString()}`);
     }
     
-        track.innerHTML = fotos.map((f, i) => {
+        track.innerHTML = fotos.map((f, fi) => {
             const urlStr = typeof f === 'string' ? f : f.url;
             const srcBase = getDriveDirectLink(urlStr, 'w1200');
             const src800 = getDriveDirectLink(urlStr, 'w800');
             const srcMax = getDriveDirectLink(urlStr, 'w2000');
             const hasUrl = urlStr && (urlStr.includes('drive.google.com') || urlStr.includes('id='));
-            const srcset = hasUrl ? `srcset="${src800} 800w, ${srcBase} 1200w, ${srcMax} 2000w"` : '';
+            const lazyFs = fi !== currentPhotoIndex;
+            const fsImgSrc = lazyFs ? `data-src="${srcBase}"` : `src="${srcBase}"`;
+            const fsImgSrcset = hasUrl
+                ? (lazyFs
+                    ? `data-srcset="${src800} 800w, ${srcBase} 1200w, ${srcMax} 2000w"`
+                    : `srcset="${src800} 800w, ${srcBase} 1200w, ${srcMax} 2000w"`)
+                : '';
             return `
                 <div class="min-w-full h-full flex items-center justify-center bg-transparent">
-                    <img id="fullscreen-img-${i}" src="${srcBase}"
-                         ${srcset} sizes="100vw"
+                    <img id="fullscreen-img-${fi}" ${fsImgSrc}
+                         ${fsImgSrcset} sizes="100vw"
                          class="max-w-full max-h-full m-auto object-contain select-none shadow-[20px_20px_60px_rgba(0,0,0,0.6)] opacity-0 transition-opacity duration-500"
                          draggable="false"
-                         loading="lazy"
                          onload="this.classList.remove('opacity-0')"
-                         onerror="this.src='https://picsum.photos/seed/broken/1600/1200?grayscale'; this.onerror=null; this.onload=()=>this.classList.remove('opacity-0')">
+                         onerror="this.onerror=null; this.removeAttribute('srcset'); this.classList.remove('opacity-0'); this.src='https://picsum.photos/seed/broken/1600/1200?grayscale'">
                 </div>
             `;
         }).join('');
+        observeLazyImages();
 
         // Navigation controls
         const existingControls = overlay.querySelector('.fullscreen-controls');
@@ -1623,6 +1668,16 @@ function updateFullscreenCarousel() {
     
     if (track) {
         track.style.transform = `translateX(-${currentPhotoIndex * 100}%)`;
+        // Cargar imagen actual + precargar la siguiente y la anterior
+        [currentPhotoIndex, currentPhotoIndex + 1, currentPhotoIndex - 1].forEach(adjIdx => {
+            const slide = track.children[(adjIdx + fotos.length) % fotos.length];
+            if (!slide) return;
+            const img = slide.querySelector('img');
+            if (img) {
+                if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+                if (img.dataset.srcset) { img.srcset = img.dataset.srcset; delete img.dataset.srcset; }
+            }
+        });
     }
     if (info) {
         info.textContent = `${String(currentPhotoIndex + 1).padStart(2, '0')} / ${String(fotos.length).padStart(2, '0')}`;
@@ -2317,4 +2372,19 @@ document.addEventListener('wheel', hideQRCode, { capture: true });
 const _isDemoMode = new URLSearchParams(window.location.search).get('demo');
 if (_isDemoMode === 'ok' || _isDemoMode === 'true' || _isDemoMode === '1') {
     setTimeout(runDemoSequence, 1000);
+}
+
+// Lazy load con IntersectionObserver
+const lazyObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const img = entry.target;
+        if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+        if (img.dataset.srcset) { img.srcset = img.dataset.srcset; delete img.dataset.srcset; }
+        lazyObserver.unobserve(img);
+    });
+}, { rootMargin: '200px' });
+
+function observeLazyImages() {
+    document.querySelectorAll('img[data-src]').forEach(img => lazyObserver.observe(img));
 }
