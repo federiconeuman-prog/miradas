@@ -154,27 +154,15 @@ async function renderYears(collections) {
         return;
     }
 
-    // Precargar imágenes antes de renderizar para que estén en caché
-    await Promise.all(years.map(year => new Promise(resolve => {
-        const src = getDriveDirectLink(collections[year].imagen, 'w1200');
-        if (!src) return resolve();
-        const img = new Image();
-        img.onload = resolve;
-        img.onerror = resolve;
-        img.src = src;
-    })));
-
     container.innerHTML = years.map(year => {
         const c = collections[year];
-        const src = getDriveDirectLink(c.imagen, 'w1200');
+        const src = getDriveDirectLink(c.imagen, 'w800');
         const isActive = c.estado === 'activo';
         return `
             <button ${isActive ? `onclick="showTab('hitos', ${year})"` : ''} class="group relative flex flex-col items-center p-8 md:p-12 lg:p-16 max-w-3xl overflow-hidden rounded-2xl ${isActive ? 'cursor-pointer active:scale-95' : 'opacity-20 grayscale cursor-default pointer-events-none'} transition-transform duration-300">
                 <!-- Project Image Reveal -->
                 <div class="absolute inset-2 opacity-50 md:opacity-[0.24] group-hover:opacity-[0.65] transition-all duration-1000 pointer-events-none overflow-hidden grayscale md:grayscale-0">
                     <img src="${src}"
-                         srcset="${getDriveDirectLink(c.imagen, 'w400')} 400w, ${getDriveDirectLink(c.imagen, 'w800')} 800w, ${getDriveDirectLink(c.imagen, 'w1200')} 1200w"
-                         sizes="(max-width: 768px) 100vw, 1200px"
                          class="w-full h-full object-cover scale-[1.3] group-hover:scale-110 transition-transform duration-[8000ms] ease-out mobile-animate-card-img"
                          alt="${c.titulo || 'Proyecto Miradas'}"
                          loading="lazy">
@@ -1000,6 +988,7 @@ document.getElementById('grid-container')?.addEventListener('scroll', (e) => han
 // VISTA DETALLE
 function getDriveDirectLink(url, sz = null) {
     if (!url) return '';
+    url = String(url).trim();
     let match = url.match(/\/(?:file\/)?d\/([a-zA-Z0-9_-]+)/);
     if (!match) match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
     if (match && match[1]) {
@@ -1134,7 +1123,7 @@ async function showDetail(id, isFromMap = false, pushHistory = true) {
                                              draggable="false"
                                              ${i === 0 ? 'loading="eager"' : ''}
                                              onload="this.classList.remove('opacity-0')"
-                                             onerror="this.onerror=null; this.removeAttribute('srcset'); this.classList.remove('opacity-0'); this.src='https://picsum.photos/seed/broken/1200/800?grayscale'">
+                                             onerror="retryImage(this,'https://picsum.photos/seed/broken/1200/800?grayscale')">
                                         <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300">
                                             <span class="bg-black/80 text-white px-5 py-2.5 rounded-full text-[10px] uppercase tracking-[0.3em] font-bold font-sans backdrop-blur-md shadow-2xl">Pantalla completa</span>
                                         </div>
@@ -1339,23 +1328,18 @@ function renderPublicGrid(data = null) {
         const hasUrl = b.imageUrl && (b.imageUrl.includes('drive.google.com') || b.imageUrl.includes('id='));
         const lazy = idx >= 4;
         const imgSrc = lazy ? `data-src="${baseSrc}"` : `src="${baseSrc}"`;
-        const imgSrcset = hasUrl
-            ? (lazy
-                ? `data-srcset="${getDriveDirectLink(b.imageUrl, 'w400')} 400w, ${baseSrc} 600w, ${getDriveDirectLink(b.imageUrl, 'w800')} 800w"`
-                : `srcset="${getDriveDirectLink(b.imageUrl, 'w400')} 400w, ${baseSrc} 600w, ${getDriveDirectLink(b.imageUrl, 'w800')} 800w"`)
-            : '';
         const loadingAttr = lazy ? '' : 'loading="eager"';
 
         return `
         <div onclick="showDetail('${b.id}')" class="group cursor-pointer bg-white p-4 md:p-6 hover:bg-gray-50/50 transition-all duration-300 overflow-hidden relative">
             <div class="space-y-4 h-full">
                 <div class="w-full aspect-video overflow-hidden rounded-xl md:rounded-2xl bg-gray-50 shrink-0">
-                    <img ${imgSrc} ${imgSrcset} sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                    <img ${imgSrc}
                          class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 grayscale opacity-0"
                          alt="${b.name}"
                          ${loadingAttr}
                          onload="this.classList.remove('opacity-0')"
-                         onerror="this.onerror=null; this.removeAttribute('srcset'); this.classList.remove('opacity-0'); this.src='${fallback}'">
+                         onerror="retryImage(this,'${fallback}')">
                 </div>
                 <div class="py-1 text-center flex-1 min-w-0">
                     <h3 class="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-black uppercase truncate w-full mb-1">${b.name}</h3>
@@ -1592,7 +1576,7 @@ function openFullscreen(index, pushHistory = true) {
                          class="max-w-full max-h-full m-auto object-contain select-none shadow-[20px_20px_60px_rgba(0,0,0,0.6)] opacity-0 transition-opacity duration-500"
                          draggable="false"
                          onload="this.classList.remove('opacity-0')"
-                         onerror="this.onerror=null; this.removeAttribute('srcset'); this.classList.remove('opacity-0'); this.src='https://picsum.photos/seed/broken/1600/1200?grayscale'">
+                         onerror="retryImage(this,'https://picsum.photos/seed/broken/1600/1200?grayscale')">
                 </div>
             `;
         }).join('');
@@ -2348,30 +2332,36 @@ function stopDemo() {
     if (detPanel && !detPanel.classList.contains('hidden')) closeDetail(false);
 }
 
-// Hide QR code upon interaction
-function hideQRCode() {
-    const qrContainer = document.getElementById('desktop-qr-container');
-    if (qrContainer && !qrContainer.classList.contains('opacity-0')) {
-        qrContainer.style.opacity = '0';
-        qrContainer.style.pointerEvents = 'none';
-        setTimeout(() => qrContainer.style.display = 'none', 500);
-        // Remove event listeners once hidden
-        document.removeEventListener('click', hideQRCode);
-        document.removeEventListener('touchstart', hideQRCode);
-        document.removeEventListener('scroll', hideQRCode, { capture: true });
-        document.removeEventListener('wheel', hideQRCode, { capture: true });
-    }
+// QR: se oculta al interactuar, reaparece cada 45s
+function showQRCode() {
+    const qr = document.getElementById('desktop-qr-container');
+    if (!qr) return;
+    qr.style.opacity = '1';
+    qr.style.pointerEvents = 'auto';
 }
 
-document.addEventListener('click', hideQRCode);
-document.addEventListener('touchstart', hideQRCode);
-document.addEventListener('scroll', hideQRCode, { capture: true });
-document.addEventListener('wheel', hideQRCode, { capture: true });
+function hideQRCode() {
+    const qr = document.getElementById('desktop-qr-container');
+    if (!qr) return;
+    qr.style.opacity = '0';
+    qr.style.pointerEvents = 'none';
+}
+
+setInterval(showQRCode, 45000);
+document.addEventListener('pointerdown', hideQRCode);
+document.addEventListener('keydown', hideQRCode);
 
 
 const _isDemoMode = new URLSearchParams(window.location.search).get('demo');
 if (_isDemoMode === 'ok' || _isDemoMode === 'true' || _isDemoMode === '1') {
     setTimeout(runDemoSequence, 1000);
+}
+
+function retryImage(img, fallback) {
+    img.onerror = null;
+    img.removeAttribute('srcset');
+    img.classList.remove('opacity-0');
+    img.src = fallback;
 }
 
 // Lazy load con IntersectionObserver
